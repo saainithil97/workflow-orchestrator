@@ -1,0 +1,89 @@
+{
+  "name": "dev-workflow",
+  "version": "1.0.0",
+  "description": "Structured, gated development workflow orchestration with TDD, observability, and session-to-session learning.",
+  "author": "saainithil",
+  "license": "MIT",
+  "homepage": "https://github.com/saainithil/workflow-orchestrator",
+  "repository": "https://github.com/saainithil/workflow-orchestrator",
+  "namespace": "dev-workflow",
+  "permissions": {
+    "bash": [
+      "git status",
+      "git diff",
+      "git log",
+      "git push",
+      "npm test",
+      "npm run test",
+      "npx jest",
+      "npx vitest",
+      "npx playwright",
+      "go test",
+      "cargo test",
+      "pytest",
+      "make test"
+    ],
+    "mcp": [],
+    "filesystem": {
+      "read": [
+        "**/*"
+      ],
+      "write": [
+        "docs/**",
+        ".dev-workflow/**",
+        "src/**",
+        "test/**",
+        "tests/**",
+        "__tests__/**",
+        "*.md"
+      ]
+    }
+  },
+  "skills": [
+    "skills/requirement",
+    "skills/hld",
+    "skills/lld",
+    "skills/implement",
+    "skills/review",
+    "skills/review-extended",
+    "skills/observe",
+    "skills/staging",
+    "skills/docs",
+    "skills/retro",
+    "skills/preferences",
+    "skills/tools",
+    "skills/workflow",
+    "skills/doctor",
+    "skills/onboard"
+  ],
+  "agents": [
+    "agents/architect.md",
+    "agents/implementer.md",
+    "agents/reviewer.md",
+    "agents/documenter.md"
+  ],
+  "rules": [
+    "rules/workflow.md",
+    "rules/tdd.md",
+    "rules/code-quality.md",
+    "rules/observability.md",
+    "rules/documentation.md",
+    "rules/tech-debt.md"
+  ],
+  "hooks": "hooks/hooks.json",
+  "scaffold": {
+    "description": "Project-local files scaffolded on install",
+    "source": "scaffold/",
+    "targets": {
+      ".dev-workflow/": "scaffold/.dev-workflow/",
+      ".opencode/": "scaffold/.opencode/",
+      "docs/": "scaffold/docs/",
+      "opencode.json": "scaffold/opencode.json"
+    },
+    "preserve_on_update": [
+      ".dev-workflow/preferences.yml",
+      ".dev-workflow/preferences.local.yml",
+      ".dev-workflow/learnings/LEARNINGS.md"
+    ]
+  }
+}

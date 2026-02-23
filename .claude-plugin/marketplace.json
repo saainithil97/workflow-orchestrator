@@ -1,0 +1,17 @@
+{
+  "name": "dev-workflow-marketplace",
+  "owner": {
+    "name": "saainithil"
+  },
+  "metadata": {
+    "description": "Private marketplace for the dev-workflow plugin"
+  },
+  "plugins": [
+    {
+      "name": "dev-workflow",
+      "source": ".",
+      "description": "Structured, gated development workflow orchestration with TDD, observability, and session-to-session learning.",
+      "version": "1.0.0"
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+# Dashboard-as-Code Definition
+# Platform-agnostic format. Adapt to your dashboard platform (Grafana, Datadog, etc.)
+# See .dev-workflow/preferences.yml for dashboard_platform preference.
+
+dashboard:
+  title: "<Service Name> — Overview"
+  description: "Operational dashboard for <service>"
+  tags:
+    - <service-name>
+    - production
+  refresh: "30s"
+  time_range: "1h"
+
+  # Variables (template variables for filtering)
+  variables:
+    - name: environment
+      type: query
+      values: ["production", "staging", "development"]
+      default: "production"
+    - name: service
+      type: constant
+      value: "<service-name>"
+
+  # Rows of panels
+  rows:
+    # --- Row 1: Request Overview ---
+    - title: "Request Overview"
+      panels:
+        - title: "Request Rate"
+          type: timeseries
+          metric: "rate(http_requests_total{service=\"$service\"}[5m])"
+          unit: "reqps"
+          description: "Requests per second"
+
+        - title: "Error Rate"
+          type: timeseries
+          metric: "rate(http_requests_total{service=\"$service\", status_code=~\"5..\"}[5m]) / rate(http_requests_total{service=\"$service\"}[5m]) * 100"
+          unit: "percent"
+          thresholds:
+            - value: 1
+              color: yellow
+            - value: 5
+              color: red
+          description: "Percentage of 5xx responses"
+
+        - title: "Latency (p50 / p95 / p99)"
+          type: timeseries
+          metrics:
+            - label: "p50"
+              query: "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{service=\"$service\"}[5m]))"
+            - label: "p95"
+              query: "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service=\"$service\"}[5m]))"
+            - label: "p99"
+              query: "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{service=\"$service\"}[5m]))"
+          unit: "seconds"
+          description: "Request latency distribution"
+
+    # --- Row 2: Error Breakdown ---
+    - title: "Errors"
+      panels:
+        - title: "Errors by Type"
+          type: timeseries
+          metric: "rate(errors_total{service=\"$service\"}[5m])"
+          group_by: "type"
+          description: "Error rate broken down by error type"
+
+        - title: "Status Code Distribution"
+          type: piechart
+          metric: "sum by (status_code) (increase(http_requests_total{service=\"$service\"}[1h]))"
+          description: "HTTP status code distribution over the last hour"
+
+    # --- Row 3: Database ---
+    - title: "Database"
+      panels:
+        - title: "Query Duration"
+          type: timeseries
+          metrics:
+            - label: "p50"
+              query: "histogram_quantile(0.50, rate(db_query_duration_seconds_bucket{service=\"$service\"}[5m]))"
+            - label: "p95"
+              query: "histogram_quantile(0.95, rate(db_query_duration_seconds_bucket{service=\"$service\"}[5m]))"
+          unit: "seconds"
+          description: "Database query latency"
+
+        - title: "Active Connections"
+          type: gauge
+          metric: "db_connections_active{service=\"$service\"}"
+          thresholds:
+            - value: 50
+              color: yellow
+            - value: 90
+              color: red
+          max: 100
+          description: "Current active database connections"
+
+    # --- Row 4: Business Metrics ---
+    - title: "Business Metrics"
+      panels:
+        - title: "<Business Event> Rate"
+          type: timeseries
+          metric: "rate(<business_metric>_total{service=\"$service\"}[5m])"
+          description: "<Description of business metric>"
+
+# --- Alert Rules ---
+alerts:
+  - name: "High Error Rate — $service"
+    condition: "rate(errors_total{service=\"$service\"}[5m]) / rate(http_requests_total{service=\"$service\"}[5m]) > 0.05"
+    duration: "5m"
+    severity: critical
+    runbook: "docs/runbooks/<service>-high-error-rate.md"
+    notification:
+      channel: "<from preferences: alert_notification>"
+      message: "Error rate for $service exceeds 5% for 5 minutes"
+
+  - name: "High Latency — $service"
+    condition: "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{service=\"$service\"}[5m])) > 2.0"
+    duration: "5m"
+    severity: warning
+    runbook: "docs/runbooks/<service>-high-latency.md"
+    notification:
+      channel: "<from preferences: alert_notification>"
+      message: "p99 latency for $service exceeds 2 seconds for 5 minutes"
+
+  - name: "Database Connection Pool Exhaustion — $service"
+    condition: "db_connections_active{service=\"$service\"} > 90"
+    duration: "2m"
+    severity: critical
+    runbook: "docs/runbooks/<service>-db-pool-exhaustion.md"
+    notification:
+      channel: "<from preferences: alert_notification>"
+      message: "Database connection pool for $service is near exhaustion"

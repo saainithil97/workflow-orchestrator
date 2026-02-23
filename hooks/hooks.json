@@ -1,0 +1,11 @@
+{
+  "hooks": [
+    {
+      "name": "pre-push-gate-check",
+      "description": "Checks that the review stage has passed before allowing git push. Enforcement level is configurable via .dev-workflow/preferences.yml (workflow.enforcement: warn|strict).",
+      "event": "pre-push",
+      "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/gate-check.js",
+      "enabled": true
+    }
+  ]
+}

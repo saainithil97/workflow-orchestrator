@@ -1,0 +1,65 @@
+# Development Workflow Preferences
+# Managed by the /preferences command. Edit manually or run /preferences to update.
+# Last updated: <YYYY-MM-DD>
+
+# Run /preferences to initialize these values with guided recommendations.
+
+# project:
+#   name:
+#   language:
+#   framework:
+#   package_manager:
+
+# testing:
+#   framework:
+#   location: colocated  # colocated | separate
+#   coverage_branch: 90
+#   coverage_line: 95
+#   e2e_framework:
+
+# observability:
+#   otel_exporter: otlp
+#   otel_endpoint: http://localhost:4318
+#   otel_service_name:
+#   logging_library:
+#   metrics_format: prometheus
+
+# monitoring:
+#   dashboard_platform: grafana  # grafana | datadog | generic
+#   alert_notification: slack    # slack | pagerduty | email
+
+# documentation:
+#   api_format: openapi          # openapi | graphql | protobuf
+#   adr_format: madr-v3
+#   doc_comment_style:           # jsdoc | tsdoc | docstring | godoc | rustdoc
+
+# quality:
+#   linter:
+#   formatter:
+#   max_function_length: 30
+#   max_file_length: 300
+
+# workflow:
+#   branching_strategy: trunk-based  # trunk-based | gitflow | github-flow
+#   commit_convention: conventional-commits
+#   review_dimensions:
+#     api-design: true
+#     concurrency: false
+#     scalability: true
+#     observability: true
+#     accessibility: false
+#     i18n: false
+#     data-integrity: true
+
+# staging:
+#   url:
+#   deploy_command:
+#   integration_test_command:
+#   e2e_test_command:
+#   ci_cd:                       # github-actions | gitlab-ci | jenkins
+
+# tools:
+#   mcp_servers:                  # List of configured MCP servers (from tools-catalog.yml)
+#     - github-mcp
+#     - git-mcp
+#   enforcement: warn             # warn | strict (pre-push hook behavior)

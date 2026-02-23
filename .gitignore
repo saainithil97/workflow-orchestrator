@@ -1,0 +1,31 @@
+# ── Plugin Repository .gitignore ─────────────────────────────────────────────
+
+# Build output
+dist/
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local preferences (the template is committed; user overrides are not)
+scaffold/.dev-workflow/preferences.local.yml
+
+# Claude Code local overrides
+CLAUDE.local.md
+
+# npm
+*.tgz
+.npmrc
+
+# Environment files
+.env
+.env.local
+.env.*.local

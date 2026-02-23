@@ -1,0 +1,51 @@
+{
+  "name": "@dev-workflow/kit",
+  "version": "1.0.0",
+  "description": "Structured, gated development workflow orchestration for Claude Code and OpenCode. TDD, observability, review gates, and session-to-session learning.",
+  "license": "MIT",
+  "author": "saainithil",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saainithil/workflow-orchestrator.git"
+  },
+  "homepage": "https://github.com/saainithil/workflow-orchestrator#readme",
+  "keywords": [
+    "dev-workflow",
+    "claude-code",
+    "opencode",
+    "tdd",
+    "observability",
+    "code-review",
+    "architecture",
+    "pipeline",
+    "gated-development"
+  ],
+  "bin": {
+    "dev-workflow": "./bin/init.js"
+  },
+  "main": "./plugin/workflow-enforcer.js",
+  "exports": {
+    ".": "./plugin/workflow-enforcer.js",
+    "./plugin/workflow-enforcer": "./plugin/workflow-enforcer.js"
+  },
+  "files": [
+    "bin/",
+    "plugin/",
+    "scaffold/",
+    "skills/",
+    "agents/",
+    "rules/",
+    "hooks/",
+    ".claude-plugin/",
+    "CLAUDE.md",
+    "AGENTS.md",
+    "README.md"
+  ],
+  "scripts": {
+    "init": "node bin/init.js init",
+    "update": "node bin/update.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

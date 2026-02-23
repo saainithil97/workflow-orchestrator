@@ -1,0 +1,8 @@
+# ── Dev Workflow Kit ──────────────────────────────────────────────────────────
+# Add these lines to your project's .gitignore
+
+# Personal preferences (team preferences.yml IS committed)
+.dev-workflow/preferences.local.yml
+
+# Claude Code local overrides
+CLAUDE.local.md
