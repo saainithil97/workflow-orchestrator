@@ -23,6 +23,7 @@ Parse the `tasks` array from the LLD frontmatter. Build waves via topological so
 1. Wave 1 = tasks with empty `depends_on`
 2. Wave N = tasks whose dependencies are all in waves ≤ N-1
 3. **File conflict check**: if two tasks in the same wave write to the same file, bump the later one to the next wave
+4. **Cycle check**: if a circular `depends_on` exists, stop — report the cycle and ask the developer to fix the LLD
 
 Print the wave plan and ask the developer to confirm or proceed automatically.
 
@@ -45,7 +46,7 @@ TDD cycle:
 Rules:
   - Run ONLY this task's tests — the orchestrator runs the full suite after the wave
   - Do NOT update the LLD — the orchestrator does that after validating the wave
-  - If blocked (missing dependency, interface mismatch), report immediately — do not workaround silently
+  - If blocked (missing dependency, interface mismatch), report immediately — do not workaround silently. Orchestrator decides: abort wave (if other tasks depend on this), skip (if none depend on it and it's environmental), or replan.
 
 Return: task ID, status (complete|blocked), files written, summary, issues.
 ```
@@ -55,7 +56,7 @@ Wait for ALL agents in the wave to complete.
 ## Step 3: After Every Wave
 
 1. **Run the full test suite** — catches runtime regressions between tasks
-2. If suite fails: identify the offending task and fix before proceeding
+2. If suite fails: identify the offending task by matching failing tests to each task's changed files, then fork a targeted fix agent scoped to those files — do not fix regressions directly in the orchestrator context
 3. **Update the LLD**: set `status: complete`, `tests_passing: true` for each completed task; recalculate `completion.percentage`
 4. Record one line per task: `Wave N | Task M | complete | <summary>` — discard the rest
 
