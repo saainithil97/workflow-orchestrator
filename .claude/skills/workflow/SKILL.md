@@ -53,6 +53,16 @@ Run each stage (or parallel group) in the resolved order. After each stage, **re
 
 Example: `✓ review  |  pass-with-warnings  |  docs/lld/feature.md  |  0 critical, 2 warnings`
 
+After recording, print a progress line:
+```
+Stage N/M (<stage-name>) complete. → Next: <next-stage-name>
+```
+
+On pipeline failure, print before error recovery:
+```
+Pipeline stopped at stage N/M (<stage>). Completed: [list]. Failed: <stage>.
+```
+
 Discard the rest of the stage output from context.
 
 ---
@@ -166,7 +176,12 @@ Record each: `✓ docs | complete | N files updated` and `✓ retro | complete |
 
 ## Pipeline Summary Report
 
-After all stages complete, present a final summary using only the recorded status entries:
+After all stages complete, print:
+```
+Pipeline complete — N/M stages ran, M skipped.
+```
+
+Then present a final summary using only the recorded status entries:
 
 ```markdown
 # Workflow Complete: $ARGUMENTS

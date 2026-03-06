@@ -5,6 +5,14 @@ agent: build
 
 Validate feature $ARGUMENTS against the staging environment.
 
+## Pipeline Skip Check
+
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md`.
+
+If `staging` is **disabled** in the effective pipeline:
+- Print: "Staging stage is disabled in pipeline configuration. Skipping."
+- Exit.
+
 ## Gate Check
 
 Read `docs/lld/$ARGUMENTS.md`. Verify: `review.status` is `pass` or `pass-with-warnings`, `review.critical_issues` is `0`. If not, STOP and suggest `/review $ARGUMENTS`.

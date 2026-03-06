@@ -47,6 +47,8 @@ All documents in `docs/` (requirements, hld, lld, adr, runbooks, migrations, das
 | `/dev-workflow:docs <name>` | Update all documentation |
 | `/dev-workflow:retro <name>` | Retrospective — capture learnings and feedback |
 | `/dev-workflow:preferences` | View or update developer/team preferences (includes pipeline config) |
+| `/dev-workflow:status <name>` | Show pipeline progress for a feature |
+| `/dev-workflow:reset <name> [stage\|task] [options]` | Manually fix pipeline state |
 | `/dev-workflow:tools` | Browse and configure recommended MCP servers and dev tools |
 | `/dev-workflow:doctor` | Scan codebase for tech debt, generate health report |
 | `/dev-workflow:onboard` | Generate codebase-aware CLAUDE.md and AGENTS.md |

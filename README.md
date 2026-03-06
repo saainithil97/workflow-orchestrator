@@ -181,6 +181,8 @@ Additional commands:
 - `/dev-workflow:review-extended` — full 20-dimension review
 - `/dev-workflow:observe` — add observability instrumentation
 - `/dev-workflow:preferences` — manage team/personal preferences
+- `/dev-workflow:status <name>` — show pipeline progress for a feature
+- `/dev-workflow:reset <name> [stage|task] [options]` — manually fix pipeline state
 - `/dev-workflow:tools` — browse and configure recommended MCP servers and dev tools
 - `/dev-workflow:doctor` — scan codebase for tech debt, generate health report
 - `/dev-workflow:onboard` — analyze codebase, generate CLAUDE.md + AGENTS.md

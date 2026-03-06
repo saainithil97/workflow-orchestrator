@@ -1,6 +1,17 @@
 # Dashboard-as-Code Definition
 # Platform-agnostic format. Adapt to your dashboard platform (Grafana, Datadog, etc.)
 # See .dev-workflow/preferences.yml for dashboard_platform preference.
+#
+# Metric query syntax by platform:
+#   Prometheus/Grafana:  rate(metric_name_total[5m])
+#   Datadog:             avg:metric.name{env:production}.as_rate()
+#   CloudWatch:          SELECT AVG(MetricName) FROM SCHEMA(namespace, Dimension)
+#   New Relic:           SELECT rate(count(*), 1 MINUTE) FROM Transaction
+#   Elastic:             avg(system.cpu.user.pct) by (host)
+#
+# The examples below use Prometheus/Grafana syntax (the default).
+# If your platform is configured in preferences.monitoring.dashboard_platform,
+# replace the metric queries with your platform's syntax.
 
 dashboard:
   title: "<Service Name> — Overview"

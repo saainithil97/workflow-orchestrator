@@ -29,6 +29,11 @@ Print the wave plan and ask the developer to confirm or proceed automatically.
 
 ## Step 2: Execute Each Wave
 
+Before launching each wave, print:
+```
+Starting Wave N/M — K task(s): [task names]
+```
+
 For every wave — whether it has one task or many — fork one agent per task with these instructions:
 
 ```
@@ -56,11 +61,14 @@ Wait for ALL agents in the wave to complete.
 ## Step 3: After Every Wave
 
 1. **Run the full test suite** — catches runtime regressions between tasks
-2. If suite fails: identify the offending task by matching failing tests to each task's changed files, then fork a targeted fix agent scoped to those files — do not fix regressions directly in the orchestrator context
+2. If suite fails: print `"Wave N/M failed — regression detected. Investigating..."`. Identify the offending task by matching failing tests to each task's changed files, then fork a targeted fix agent scoped to those files — do not fix regressions directly in the orchestrator context
 3. **Update the LLD**: set `status: complete`, `tests_passing: true` for each completed task; recalculate `completion.percentage`
 4. Record one line per task: `Wave N | Task M | complete | <summary>` — discard the rest
+5. Print: `"Wave N/M complete. X% done (Y/Z tasks total)."`
 
 ## After All Waves
+
+Print: `"All waves complete. Running final coverage check..."`
 
 1. Run full test suite with coverage
 2. Verify coverage meets targets from preferences

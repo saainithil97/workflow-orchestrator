@@ -47,6 +47,8 @@ All documents in `docs/` (requirements, hld, lld, adr, runbooks, migrations, das
 | `/docs <name>` | Update all documentation |
 | `/retro <name>` | Retrospective — capture learnings and feedback |
 | `/preferences` | View or update developer/team preferences (includes pipeline config) |
+| `/status <name>` | Show pipeline progress for a feature |
+| `/reset <name> [stage\|task] [options]` | Manually fix pipeline state |
 | `/tools` | Browse and configure recommended MCP servers and dev tools |
 | `/doctor` | Scan codebase for tech debt, generate health report |
 | `/onboard` | Generate codebase-aware CLAUDE.md and AGENTS.md |

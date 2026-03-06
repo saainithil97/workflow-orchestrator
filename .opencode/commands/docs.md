@@ -5,6 +5,14 @@ agent: build
 
 Update documentation for feature: $ARGUMENTS
 
+## Pipeline Skip Check
+
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md`.
+
+If `docs` is **disabled** in the effective pipeline:
+- Print: "Docs stage is disabled in pipeline configuration. Skipping."
+- Exit.
+
 ## Gate Check
 
 Read `docs/lld/$ARGUMENTS.md`. Verify review passed with zero critical issues. If staging was run, verify it passed.

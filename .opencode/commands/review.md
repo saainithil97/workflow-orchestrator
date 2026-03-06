@@ -13,8 +13,10 @@ Read `docs/lld/$ARGUMENTS.md`. Verify ALL tasks have `status: complete` and `tes
 ## Instructions
 
 1. Read `.dev-workflow/preferences.yml` and `.dev-workflow/learnings/LEARNINGS.md`
-2. Read `docs/requirements/$ARGUMENTS.md`, `docs/hld/$ARGUMENTS.md`, `docs/lld/$ARGUMENTS.md`
-3. Identify all changed files
+2. Load `.dev-workflow/references/code-quality.md` for full review dimension definitions
+3. If Tier 2/3 dimensions are enabled in preferences (`review_dimensions`), also load `.dev-workflow/references/review-dimensions.md`
+4. Read `docs/requirements/$ARGUMENTS.md`, `docs/hld/$ARGUMENTS.md`, `docs/lld/$ARGUMENTS.md`
+5. Identify all changed files
 
 ## Automated Checks
 

@@ -5,6 +5,14 @@ agent: build
 
 Set up observability for feature: $ARGUMENTS
 
+## Pipeline Skip Check
+
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md`.
+
+If `observe` is **disabled** in the effective pipeline:
+- Print: "Observe stage is disabled in pipeline configuration. Skipping."
+- Exit.
+
 ## Instructions
 
 1. Read `.dev-workflow/preferences.yml` (otel_exporter, logging_library, dashboard_platform, metrics_format)

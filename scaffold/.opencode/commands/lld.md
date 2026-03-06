@@ -8,7 +8,11 @@ Create a Low-Level Design for feature: $ARGUMENTS
 
 ## Gate Check
 
-Read `docs/hld/$ARGUMENTS.md`. Verify: `status: approved|complete`, `completion.percentage: 100`, `completion.blockers: []`. If not met, STOP and suggest running `/hld $ARGUMENTS`.
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md`.
+
+**If HLD is enabled** in the effective pipeline: Read `docs/hld/$ARGUMENTS.md`. Verify: `status: approved|complete`, `completion.percentage: 100`, `completion.blockers: []`. If not met, STOP and suggest running `/hld $ARGUMENTS`.
+
+**If HLD is disabled** in the effective pipeline: Read `docs/requirements/$ARGUMENTS.md` instead. Apply the same checks. If not met, STOP and suggest running `/requirement $ARGUMENTS`.
 
 ## Instructions
 

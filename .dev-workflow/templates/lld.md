@@ -72,39 +72,49 @@ Brief summary linking to the HLD. What exactly are we building?
 
 ## 3. Interface Definitions
 
-```typescript
-// Replace with your project's language
+<!-- Replace the example below with your project's language and conventions -->
 
-interface CreateResourceRequest {
-  name: string;
-  description?: string;
-}
+```
+// TypeScript example:
+// interface CreateResourceRequest { name: string; description?: string; }
+// async function createResource(req: CreateResourceRequest): Promise<Resource>
 
-interface CreateResourceResponse {
-  id: string;
-  name: string;
-  createdAt: Date;
-}
+// Python example:
+// def create_resource(name: str, description: str | None = None) -> Resource: ...
 
-function createResource(req: CreateResourceRequest): Promise<CreateResourceResponse>;
-function getResource(id: string): Promise<Resource | null>;
-function deleteResource(id: string): Promise<void>;
+// Go example:
+// func CreateResource(ctx context.Context, req CreateResourceRequest) (*Resource, error)
+
+// Rust example:
+// fn create_resource(req: CreateResourceRequest) -> Result<Resource, AppError>
 ```
 
 ## 4. Data Models
 
-```sql
--- Replace with your project's database
+> Note: The examples below use pseudocode. Adjust for your language (see `preferences.language`).
 
-CREATE TABLE resources (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  description TEXT,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
+<!-- Data model example — adjust for your project's language -->
+<!-- TypeScript: -->
+<!-- interface Resource { id: string; name: string; createdAt: Date; } -->
+<!-- Python: -->
+<!-- @dataclass class Resource: id: str; name: str; created_at: datetime -->
+<!-- Go: -->
+<!-- type Resource struct { ID string; Name string; CreatedAt time.Time } -->
+<!-- Rust: -->
+<!-- struct Resource { id: String, name: String, created_at: DateTime<Utc> } -->
 
-CREATE INDEX idx_resources_name ON resources(name);
+```
+-- Replace with your project's database / data store
+
+-- SQL example:
+-- CREATE TABLE resources (
+--   id UUID PRIMARY KEY,
+--   name VARCHAR(255) NOT NULL,
+--   created_at TIMESTAMP NOT NULL DEFAULT NOW()
+-- );
+
+-- Key-value / document store: describe the document schema here
+-- Event store: describe the event types and payload shapes here
 ```
 
 ## 5. Implementation Tasks

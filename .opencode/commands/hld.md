@@ -6,6 +6,14 @@ subtask: true
 
 Create a High-Level Design for feature: $ARGUMENTS
 
+## Pipeline Skip Check
+
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md`.
+
+If `hld` is **disabled** in the effective pipeline:
+- Print: "HLD stage is disabled in pipeline configuration. Skipping."
+- Exit.
+
 ## Gate Check
 
 Read `docs/requirements/$ARGUMENTS.md`. Verify: `status: approved|complete`, `completion.percentage: 100`, `completion.blockers: []`. If not met, STOP and suggest running `/requirement $ARGUMENTS`.

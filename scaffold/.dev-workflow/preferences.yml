@@ -39,9 +39,16 @@
 #   max_function_length: 30
 #   max_file_length: 300
 
+workflow:
+  pipeline:
+    preset: standard          # minimal | standard | full
+  branching_strategy: trunk-based
+  commit_convention: conventional-commits
+  enforcement: warn           # warn | strict
+  max_learnings: 20
+
+# Additional workflow settings (uncomment to override defaults):
 # workflow:
-#   branching_strategy: trunk-based  # trunk-based | gitflow | github-flow
-#   commit_convention: conventional-commits
 #   review_dimensions:
 #     api-design: true
 #     concurrency: false
@@ -63,7 +70,6 @@
 #   # Mandatory stages (requirement, lld, implement, review) CANNOT be disabled.
 #   #
 #   pipeline:
-#     preset: standard          # minimal | standard | full
 #     # Per-stage overrides (uncomment and set to override the preset):
 #     # hld: true               # include HLD stage
 #     # observe: false          # skip /observe step
@@ -90,10 +96,6 @@
 #     # reviewer: opus          # thorough security + correctness analysis
 #     # documenter: sonnet      # documentation sync — simpler reasoning task
 #     # default: sonnet         # fallback for any unassigned role
-#
-#   # LEARNINGS rotation: archive entries when LEARNINGS.md exceeds this count.
-#   # Older entries are moved to .dev-workflow/learnings/archive/YYYY-MM.md
-#   # max_learnings: 20
 
 # staging:
 #   url:

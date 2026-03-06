@@ -1,7 +1,7 @@
 ---
 feature: dx-improvements
 stage: lld
-status: approved
+status: complete
 version: 1
 created: 2026-03-06
 updated: 2026-03-06
@@ -11,32 +11,32 @@ depends_on: [dx-improvements-requirement]
 completion:
   checklist:
     - item: "Phase 1 — OpenCode implementer agent fix"
-      done: false
+      done: true
     - item: "Phase 1 — OpenCode commands: pipeline skip checks for optional stages"
-      done: false
+      done: true
     - item: "Phase 1 — OpenCode LLD command: HLD-skipped gate fallback"
-      done: false
+      done: true
     - item: "Phase 1 — OpenCode workflow command: pipeline-aware execution"
-      done: false
+      done: true
     - item: "Phase 2 — preferences.yml: uncomment essential defaults"
-      done: false
+      done: true
     - item: "Phase 2 — preamble: defer non-essential preferences on first run"
-      done: false
+      done: true
     - item: "Phase 2 — /preferences skill: add quick-start mode"
-      done: false
+      done: true
     - item: "Phase 3 — /status skill"
-      done: false
+      done: true
     - item: "Phase 4 — /reset skill"
-      done: false
+      done: true
     - item: "Phase 5 — bin/init.js: fix CREATE/UPDATE label + platform flags"
-      done: false
+      done: true
     - item: "Phase 6 — progress feedback in /implement and /workflow"
-      done: false
+      done: true
     - item: "Phase 7 — language-agnostic templates"
-      done: false
+      done: true
     - item: "Sync all source dirs and update command tables"
-      done: false
-  percentage: 0
+      done: true
+  percentage: 100
   blockers: []
 
 tasks:
@@ -46,8 +46,8 @@ tasks:
       - .opencode/agents/implementer.md
       - scaffold/.opencode/agents/implementer.md
     depends_on: []
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 2
@@ -64,8 +64,8 @@ tasks:
       - scaffold/.opencode/commands/docs.md
       - scaffold/.opencode/commands/retro.md
     depends_on: []
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 3
@@ -74,8 +74,8 @@ tasks:
       - .opencode/commands/lld.md
       - scaffold/.opencode/commands/lld.md
     depends_on: []
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 4
@@ -84,8 +84,8 @@ tasks:
       - .opencode/commands/workflow.md
       - scaffold/.opencode/commands/workflow.md
     depends_on: []
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 5
@@ -96,8 +96,8 @@ tasks:
       - scaffold/.opencode/commands/review.md
       - scaffold/.opencode/commands/review-extended.md
     depends_on: []
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 6
@@ -106,8 +106,8 @@ tasks:
       - .dev-workflow/preferences.yml
       - scaffold/.dev-workflow/preferences.yml
     depends_on: []
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 7
@@ -116,8 +116,8 @@ tasks:
       - .claude/rules/preamble.md
       - rules/preamble.md
     depends_on: [6]
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 8
@@ -128,8 +128,8 @@ tasks:
       - .opencode/commands/preferences.md
       - scaffold/.opencode/commands/preferences.md
     depends_on: [6]
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 9
@@ -140,8 +140,8 @@ tasks:
       - .opencode/commands/status.md
       - scaffold/.opencode/commands/status.md
     depends_on: []
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 10
@@ -152,8 +152,8 @@ tasks:
       - .opencode/commands/reset.md
       - scaffold/.opencode/commands/reset.md
     depends_on: []
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 11
@@ -161,8 +161,8 @@ tasks:
     files:
       - bin/init.js
     depends_on: []
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 12
@@ -177,8 +177,8 @@ tasks:
       - .opencode/commands/workflow.md
       - scaffold/.opencode/commands/workflow.md
     depends_on: [4]
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 13
@@ -189,8 +189,8 @@ tasks:
       - .dev-workflow/templates/dashboard.yml
       - scaffold/.dev-workflow/templates/dashboard.yml
     depends_on: []
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 
   - id: 14
@@ -202,8 +202,8 @@ tasks:
       - .dev-workflow/templates/agents-md.md
       - .dev-workflow/templates/claude-md.md
     depends_on: [9, 10]
-    status: pending
-    tests_passing: false
+    status: complete
+    tests_passing: true
     reviewed: false
 ---
 
@@ -631,3 +631,21 @@ Add `/status` and `/reset` to every command table.
 ```
 
 **Acceptance**: All five files have both new commands in their command tables.
+
+---
+
+## Implementation Notes
+
+Implemented 2026-03-06. All 14 tasks completed across 3 waves.
+
+**Wave 1 (Tasks 1–6, 9–11, 13)**: All Wave 1 tasks completed in parallel. No file conflicts.
+
+**Wave 2 (Tasks 7, 8, 12)**: Tasks 7 and 8 depended on Task 6 (preferences.yml defaults). Task 12 depended on Task 4 (workflow command). All completed successfully.
+
+**Wave 3 (Task 14)**: Depended on Tasks 9 and 10 (/status and /reset skills). All command tables updated.
+
+**Deviations from LLD**:
+- Task 11 (`bin/init.js`): Added a new `copyRecursiveFiltered` helper function to avoid modifying the existing `copyRecursive` function, keeping backward compatibility for direct calls. The original `copyRecursive` is preserved for the rules/skills copy calls, and the new filtered version is used for the scaffold copy with platform flags.
+- The `--opencode-only` check also correctly gates the `.claude/rules/` and `.claude/skills/` copy operations (which are done separately from the scaffold copy), not just the scaffold files.
+
+**Skills directory sync**: `/status` and `/reset` skill directories were created in both `skills/` and `.claude/skills/` as required. The `skills/` directory is the canonical source; `.claude/skills/` is the installed copy.

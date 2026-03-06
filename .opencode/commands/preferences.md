@@ -9,6 +9,24 @@ Manage development workflow preferences.
 1. Read `.dev-workflow/preferences.yml`
 2. Ask the developer: **View**, **Update**, or **Initialize** preferences?
 
+### Quick Start (default for Initialize on fresh project)
+
+Ask the developer:
+> "Quick start (4 questions, ~1 minute) or full setup (~10 minutes)?"
+
+**Quick start** — ask only:
+1. Language (e.g., TypeScript, Python, Go, Rust)
+2. Framework (e.g., Next.js, FastAPI, Gin)
+3. Test framework (e.g., vitest, pytest, go test)
+4. Pipeline preset: `minimal` | `standard` (recommended) | `full`
+   - `minimal`: requirement → lld → implement → review
+   - `standard`: + hld, docs, retro
+   - `full`: + observe, staging
+
+Save and exit. Print: "Quick setup complete. Run `/preferences` again for full configuration."
+
+**Full setup**: continue to guided walkthrough below.
+
 ### Initialize (guided walkthrough)
 
 Walk through each category, recommending based on codebase analysis:

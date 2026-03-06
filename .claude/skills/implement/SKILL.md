@@ -69,6 +69,11 @@ Ask the developer to confirm the wave plan, or let you proceed automatically.
 
 **Rule: always fork.** Every task in every wave runs as a forked agent — including single-task waves. The orchestrator never writes implementation code or tests directly.
 
+Before launching each wave, print:
+```
+Starting Wave N/M — K task(s): [task names]
+```
+
 For each wave in order, launch one Task tool invocation per task in the wave:
 
 Launch each invocation as a forked implementer agent with these instructions (fill in the bracketed values per task):
@@ -145,16 +150,19 @@ Wait for ALL forked agents in the wave to complete before proceeding.
 #### After every wave:
 
 1. **Run the full test suite.** This is the orchestrator's primary job — catching regressions where tasks interact at runtime. Forked agents only run their own tests; this is the first time the full suite runs with the wave's changes in place.
-2. If the suite fails: identify which task caused the regression by checking each wave task's changed files against the failing test. Fork a targeted fix agent scoped to those files — do not fix regressions directly in the orchestrator context. Re-run the full suite after the fix before proceeding to the next wave.
+2. If the suite fails: print `"Wave N/M failed — regression detected. Investigating..."`. Identify which task caused the regression by checking each wave task's changed files against the failing test. Fork a targeted fix agent scoped to those files — do not fix regressions directly in the orchestrator context. Re-run the full suite after the fix before proceeding to the next wave.
 3. **Update the LLD** for all tasks completed in this wave:
    - Set `status: complete` in both frontmatter and body
    - Set `tests_passing: true`
    - Recalculate `completion.percentage`
 4. **Record the wave result** — one line per task: `Wave N | Task M | complete | <summary>`
+5. Print: `"Wave N/M complete. X% done (Y/Z tasks total)."`
 
 Discard the forked agents' full output from context — carry only the one-line records forward.
 
 ### Step 4: After All Waves Complete
+
+Print: `"All waves complete. Running final coverage check..."`
 
 1. Run the full test suite with coverage report
 2. Check coverage against targets from preferences (default: >90% branch for new code)

@@ -11,6 +11,25 @@ Manage the team and personal preferences that control how the development workfl
 
 ## Process
 
+### Step 0: Choose Setup Mode
+
+Ask the developer:
+> "Quick start (4 essential questions, ~1 minute) or full setup (all preferences, ~10 minutes)?"
+
+**Quick start**: Ask only:
+1. Language (e.g., TypeScript, Python, Go, Rust)
+2. Framework (e.g., Next.js, FastAPI, Gin, Axum)
+3. Test framework (e.g., vitest, pytest, go test, cargo test)
+4. Pipeline preset — explain each option briefly:
+   - `minimal`: requirement → lld → implement → review (fastest, no design docs)
+   - `standard` (recommended): adds hld, docs, retro — good for most teams
+   - `full`: adds observe, staging — best for production services
+
+Save these 4 values to `.dev-workflow/preferences.yml` and exit.
+Print: "Quick setup complete. Run `/preferences` again for full configuration."
+
+**Full setup**: Continue to Step 1 (existing walkthrough) below.
+
 ### Step 1: Read Current Preferences
 
 Read `.dev-workflow/preferences.yml`. If it does not exist, inform the developer that no preferences are set and offer to initialize them.

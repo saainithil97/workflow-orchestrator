@@ -67,8 +67,9 @@ function copyRecursive(src, dest, force, preserved) {
       fs.mkdirSync(parentDir, { recursive: true });
     }
 
+    const action = fs.existsSync(dest) ? 'UPDATE' : 'CREATE';
     fs.copyFileSync(src, dest);
-    console.log(`  ${fs.existsSync(dest) ? 'UPDATE' : 'CREATE'}            ${relativeDest}`);
+    console.log(`  ${action}            ${relativeDest}`);
   }
 }
 
@@ -128,10 +129,70 @@ function printClaudeCodeInstructions() {
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
+// Directories/files to exclude when --claude-only flag is set (no OpenCode files)
+const OPENCODE_PATHS = [
+  '.opencode',
+  'opencode.json',
+];
+
+// Directories to exclude when --opencode-only flag is set (no Claude rules/skills)
+const CLAUDE_ONLY_PATHS = [
+  '.claude/rules',
+  '.claude/skills',
+];
+
+function isExcluded(relativePath, excludedPaths) {
+  return excludedPaths.some(p => relativePath === p || relativePath.startsWith(p + '/'));
+}
+
+function copyRecursiveFiltered(src, dest, force, preserved, excludedPaths) {
+  const stats = fs.statSync(src);
+
+  if (stats.isDirectory()) {
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest, { recursive: true });
+    }
+    for (const entry of fs.readdirSync(src)) {
+      if (entry === '.gitignore-additions') continue;
+      const childSrc = path.join(src, entry);
+      const childDest = path.join(dest, entry);
+      const childRelative = path.relative(TARGET_DIR, childDest);
+      if (isExcluded(childRelative, excludedPaths)) {
+        console.log(`  SKIP (platform)  ${childRelative}`);
+        continue;
+      }
+      copyRecursiveFiltered(childSrc, childDest, force, preserved, excludedPaths);
+    }
+  } else {
+    const relativeDest = path.relative(TARGET_DIR, dest);
+
+    if (preserved.includes(relativeDest) && fs.existsSync(dest)) {
+      console.log(`  SKIP (preserved) ${relativeDest}`);
+      return;
+    }
+
+    if (fs.existsSync(dest) && !force) {
+      console.log(`  SKIP (exists)    ${relativeDest}`);
+      return;
+    }
+
+    const parentDir = path.dirname(dest);
+    if (!fs.existsSync(parentDir)) {
+      fs.mkdirSync(parentDir, { recursive: true });
+    }
+
+    const action = fs.existsSync(dest) ? 'UPDATE' : 'CREATE';
+    fs.copyFileSync(src, dest);
+    console.log(`  ${action}            ${relativeDest}`);
+  }
+}
+
 function main() {
   const args = process.argv.slice(2);
   const command = args[0];
   const force = args.includes('--force');
+  const claudeOnly = args.includes('--claude-only');
+  const opencodeOnly = args.includes('--opencode-only');
 
   if (command === 'update') {
     // Delegate to update.js
@@ -147,9 +208,27 @@ function main() {
     console.log('  update   Update scaffold files while preserving your data');
     console.log('');
     console.log('Flags:');
-    console.log('  --force  Overwrite existing files (except preserved ones)');
-    console.log('  --dry-run  Preview changes without applying them (update only)');
+    console.log('  --force          Overwrite existing files (except preserved ones)');
+    console.log('  --dry-run        Preview changes without applying them (update only)');
+    console.log('  --claude-only    Skip .opencode/ files (Claude Code users only)');
+    console.log('  --opencode-only  Skip .claude/rules/ and .claude/skills/ (OpenCode users only)');
     process.exit(command === undefined ? 1 : 0);
+  }
+
+  if (claudeOnly && opencodeOnly) {
+    console.error('Error: --claude-only and --opencode-only cannot be used together.');
+    process.exit(1);
+  }
+
+  // Build the list of paths to exclude based on platform flags
+  const excludedPaths = [];
+  if (claudeOnly) {
+    excludedPaths.push(...OPENCODE_PATHS);
+    console.log('[dev-workflow] Claude-only mode: skipping .opencode/ files');
+  }
+  if (opencodeOnly) {
+    excludedPaths.push(...CLAUDE_ONLY_PATHS);
+    console.log('[dev-workflow] OpenCode-only mode: skipping .claude/rules/ and .claude/skills/');
   }
 
   console.log('');
@@ -157,19 +236,21 @@ function main() {
   console.log('');
 
   // Copy scaffold files
-  copyRecursive(SCAFFOLD_DIR, TARGET_DIR, force, PRESERVED_FILES);
+  copyRecursiveFiltered(SCAFFOLD_DIR, TARGET_DIR, force, PRESERVED_FILES, excludedPaths);
 
-  // Copy rules/ into .claude/rules/ (single source of truth — not stored in scaffold/)
-  const targetRules = path.join(TARGET_DIR, '.claude', 'rules');
-  console.log('');
-  console.log('  Copying rules/ → .claude/rules/');
-  copyRecursive(RULES_DIR, targetRules, force, []);
+  if (!opencodeOnly) {
+    // Copy rules/ into .claude/rules/ (single source of truth — not stored in scaffold/)
+    const targetRules = path.join(TARGET_DIR, '.claude', 'rules');
+    console.log('');
+    console.log('  Copying rules/ → .claude/rules/');
+    copyRecursive(RULES_DIR, targetRules, force, []);
 
-  // Copy skills/ into .claude/skills/ (OpenCode reads .claude/skills/*/SKILL.md natively)
-  const targetSkills = path.join(TARGET_DIR, '.claude', 'skills');
-  console.log('');
-  console.log('  Copying skills/ → .claude/skills/');
-  copyRecursive(SKILLS_DIR, targetSkills, force, []);
+    // Copy skills/ into .claude/skills/ (OpenCode reads .claude/skills/*/SKILL.md natively)
+    const targetSkills = path.join(TARGET_DIR, '.claude', 'skills');
+    console.log('');
+    console.log('  Copying skills/ → .claude/skills/');
+    copyRecursive(SKILLS_DIR, targetSkills, force, []);
+  }
 
   // Merge .gitignore
   mergeGitignore();

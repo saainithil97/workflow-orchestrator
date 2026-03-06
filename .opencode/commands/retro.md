@@ -4,6 +4,15 @@ description: Retrospective — capture learnings, feedback, and mistakes for fut
 
 Run a retrospective for feature: $ARGUMENTS
 
+## Pipeline Skip Check
+
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md`.
+
+If `retro` is **disabled** AND this was invoked by `/workflow`:
+- Print: "Retro stage is disabled in pipeline configuration. Skipping."
+- Exit.
+If invoked directly by the developer (`/retro`), always run regardless of pipeline config.
+
 ## No Gate Check — always allowed.
 
 ## Process
