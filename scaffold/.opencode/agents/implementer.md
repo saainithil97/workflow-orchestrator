@@ -1,6 +1,10 @@
 ---
 description: TDD implementation specialist. Implements LLD tasks using strict Red-Green-Refactor with OTel instrumentation. Full tool access.
 mode: subagent
+# model: controls which LLM this agent uses.
+# Managed by /preferences (workflow.models.implementer). Sync runs automatically on preference change.
+# Common values: opus | sonnet | haiku (or provider-prefixed: anthropic/claude-sonnet-4-5)
+model: sonnet
 temperature: 0.2
 ---
 

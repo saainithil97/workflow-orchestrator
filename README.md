@@ -14,6 +14,10 @@ Each stage is gated — the agent cannot proceed until the prior stage's documen
 
 - **Strict gating** with YAML frontmatter validation (status, completion percentage, blockers)
 - **TDD enforcement** — Red-Green-Refactor for every implementation task
+- **Parallel task execution** — `/implement` computes execution waves from the LLD dependency graph and runs independent tasks concurrently via forked agents; full test suite runs after each wave
+- **Configurable pipeline** — enable/disable stages via presets (`minimal`/`standard`/`full`) or per-stage overrides; per-feature overrides via `pipeline_overrides` in the requirement doc
+- **Parallel pipeline stages** — configure `parallel_groups` (e.g., `[observe, staging]`, `[docs, retro]`) to run post-review stages concurrently
+- **Model routing** — assign different models per agent role (`opus` for architect/reviewer, `sonnet` for implementer/documenter); managed by `/preferences`, auto-synced to agent definition files
 - **Observability built-in** — OpenTelemetry spans, structured logging, metrics, dashboards-as-code
 - **5-dimension code review** (core) with optional 20-dimension extended review
 - **Architecture Decision Records** (MADR v3) inline and standalone
@@ -36,7 +40,7 @@ This installs skills, agents, rules, and hooks. It also scaffolds project-local 
 
 Commands become available as `/dev-workflow:requirement`, `/dev-workflow:hld`, etc.
 
-### OpenCode (npm + scaffold)
+### OpenCode / CLI (npm)
 
 ```bash
 npx @dev-workflow/kit init
@@ -53,7 +57,76 @@ This copies the project-local files into your project:
 
 Commands become available as `/requirement`, `/hld`, etc. Skills are auto-discovered by OpenCode from `.claude/skills/`.
 
-#### Optional: Runtime enforcement plugin
+### Local Installation (from a cloned repo)
+
+If the package is not published to npm, or you want to use a local fork/clone, there are three options. All scaffold the same files into your target project's working directory.
+
+#### Option A: `npm link` (recommended for repeated use)
+
+```bash
+# 1. Link the kit globally from its local clone
+cd /path/to/dev-workflow-kit
+npm link
+
+# 2. Run init in your target project
+cd /path/to/your-project
+dev-workflow init
+```
+
+To unlink later: `npm unlink -g @dev-workflow/kit`
+
+#### Option B: Direct `node` execution (one-off, no install)
+
+```bash
+cd /path/to/your-project
+node /path/to/dev-workflow-kit/bin/init.js init
+```
+
+#### Option C: `npx` with local path
+
+```bash
+cd /path/to/your-project
+npx /path/to/dev-workflow-kit init
+```
+
+All methods accept `--force` to overwrite existing files. User data (preferences, learnings, tech debt) is always preserved regardless of `--force`.
+
+#### What gets created
+
+After running init, your project will contain:
+
+```
+your-project/
+├── .claude/
+│   ├── rules/              # 9 rule files (pipeline, TDD, code quality, etc.)
+│   └── skills/             # 15 skill directories (one SKILL.md each)
+├── .dev-workflow/
+│   ├── preferences.yml     # Team preferences (committed)
+│   ├── preferences.local.yml  # Personal overrides (gitignored)
+│   ├── tools-catalog.yml   # Curated MCP server and tool catalog
+│   ├── learnings/
+│   │   └── LEARNINGS.md    # Session-to-session learning log
+│   └── templates/          # 10 document templates
+├── .opencode/
+│   ├── agents/             # 4 agent definitions
+│   └── commands/           # 15 command files
+├── docs/                   # 8 empty doc subdirectories with .gitkeep
+├── opencode.json           # OpenCode config
+└── .gitignore              # Updated with dev-workflow entries
+```
+
+#### Preserved files (never overwritten)
+
+These files are always preserved during `init` and `update`, even with `--force`:
+
+| File | Purpose |
+|------|---------|
+| `.dev-workflow/preferences.yml` | Team preferences |
+| `.dev-workflow/preferences.local.yml` | Personal preference overrides |
+| `.dev-workflow/learnings/LEARNINGS.md` | Accumulated learnings across sessions |
+| `.dev-workflow/tech-debt.yml` | Tech debt inventory |
+
+#### Optional: Runtime enforcement plugin (OpenCode only)
 
 ```bash
 npm install @dev-workflow/kit
@@ -78,11 +151,17 @@ This hooks into OpenCode's runtime to:
 npx @dev-workflow/kit update [--dry-run]
 ```
 
-Updates scaffold files (templates, commands, agents) while preserving:
-- `.dev-workflow/preferences.yml` — your team preferences
-- `.dev-workflow/preferences.local.yml` — your personal preferences
-- `.dev-workflow/learnings/LEARNINGS.md` — your accumulated learnings
-- `.dev-workflow/tech-debt.yml` — your tech debt inventory
+For local installations, use the same patterns:
+
+```bash
+# npm link approach
+dev-workflow update [--dry-run]
+
+# Direct node approach
+node /path/to/dev-workflow-kit/bin/update.js [--dry-run]
+```
+
+Updates scaffold files (templates, commands, agents) while preserving user data (preferences, learnings, tech debt).
 
 ## Pipeline Stages
 
@@ -123,6 +202,58 @@ Committed to version control. Covers:
 ### Personal Preferences (`.dev-workflow/preferences.local.yml`)
 
 Gitignored. Overrides team preferences for local development.
+
+### Model Routing
+
+Assign different models to different agent roles. Run `/preferences` to configure — it auto-syncs to `agents/*.md` and `.opencode/agents/*.md`.
+
+```yaml
+workflow:
+  models:
+    architect: opus       # complex design reasoning
+    implementer: sonnet   # code generation — cost-effective
+    reviewer: opus        # thorough security + correctness analysis
+    documenter: sonnet    # documentation sync
+    default: sonnet       # fallback
+```
+
+### Parallel Execution
+
+**Within `/implement`**: Tasks are automatically grouped into execution waves from the LLD dependency graph. Independent tasks in the same wave run concurrently as forked agents. The full test suite runs after each wave.
+
+To ensure parallel safety, the LLD architect marks accurate `files` lists per task. Tasks that write to the same file must have a `depends_on` relationship to avoid write conflicts.
+
+**Pipeline stage parallelism**: Configure stages to run concurrently after their shared gate passes:
+
+```yaml
+workflow:
+  pipeline:
+    preset: full
+    parallel_groups:
+      - [observe, staging]   # both gate on review pass
+      - [docs, retro]        # both gate on review/staging pass
+```
+
+### Pipeline Configuration
+
+```yaml
+workflow:
+  pipeline:
+    preset: standard    # minimal | standard | full
+    staging: false      # per-stage override
+```
+
+Presets:
+- `minimal`: requirement → lld → implement → review
+- `standard` (default): adds hld, docs, retro
+- `full`: adds observe, staging
+
+Per-feature overrides in `docs/requirements/<feature>.md` frontmatter:
+```yaml
+pipeline_overrides:
+  hld: false     # skip HLD for this small bugfix
+  staging: true  # require staging for this risky change
+```
 
 ### Enforcement Level
 

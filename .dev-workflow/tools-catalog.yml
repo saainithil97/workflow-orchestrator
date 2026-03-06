@@ -1,0 +1,193 @@
+# Dev Workflow — Tools & MCP Server Catalog
+#
+# This catalog lists recommended MCP servers and developer tools organized by
+# category. Use /tools (or /dev-workflow:tools) to browse interactively.
+#
+# Each entry includes:
+#   - name: Package or server name
+#   - description: What it does
+#   - install: How to install / configure
+#   - stages: Which workflow stages benefit from it
+#   - url: Project homepage
+#
+# To enable a tool for your team, add it to preferences.yml under tools.mcp_servers.
+
+categories:
+
+  # ── Version Control & Collaboration ─────────────────────────────────────────
+
+  version_control:
+    label: "Version Control & Collaboration"
+    tools:
+      - name: git-mcp
+        description: "Git operations — commit, branch, diff, log, stash. Native git integration for AI agents."
+        install: "npx @anthropic/claude-code mcp add git-mcp -- npx @anthropic/mcp-git"
+        stages: [implement, review, staging]
+        url: "https://github.com/anthropics/mcp-git"
+
+      - name: github-mcp
+        description: "GitHub API — issues, PRs, reviews, actions, releases. Read and manage GitHub resources."
+        install: "npx @anthropic/claude-code mcp add github -- npx @modelcontextprotocol/server-github"
+        stages: [requirement, hld, review, staging]
+        url: "https://github.com/modelcontextprotocol/servers/tree/main/src/github"
+
+      - name: gitlab-mcp
+        description: "GitLab API — issues, MRs, pipelines. For teams using GitLab."
+        install: "npx @anthropic/claude-code mcp add gitlab -- npx @modelcontextprotocol/server-gitlab"
+        stages: [requirement, hld, review, staging]
+        url: "https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab"
+
+  # ── Filesystem & Code ───────────────────────────────────────────────────────
+
+  filesystem:
+    label: "Filesystem & Code"
+    tools:
+      - name: filesystem-mcp
+        description: "Read, write, search, and manage files. Sandboxed directory access for AI agents."
+        install: "npx @anthropic/claude-code mcp add filesystem -- npx @modelcontextprotocol/server-filesystem /path/to/project"
+        stages: [hld, lld, implement, docs]
+        url: "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem"
+
+  # ── Database ────────────────────────────────────────────────────────────────
+
+  database:
+    label: "Database"
+    tools:
+      - name: postgres-mcp
+        description: "PostgreSQL — query, inspect schema, run migrations. Read-only by default."
+        install: "npx @anthropic/claude-code mcp add postgres -- npx @modelcontextprotocol/server-postgres postgresql://user:pass@localhost/db"
+        stages: [hld, lld, implement, staging]
+        url: "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres"
+
+      - name: sqlite-mcp
+        description: "SQLite — query, inspect schema. Lightweight local databases."
+        install: "npx @anthropic/claude-code mcp add sqlite -- npx @modelcontextprotocol/server-sqlite /path/to/db.sqlite"
+        stages: [implement, staging]
+        url: "https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite"
+
+      - name: prisma-mcp
+        description: "Prisma ORM — schema introspection, migration generation, query building."
+        install: "npm install -g @prisma/mcp-server && npx @anthropic/claude-code mcp add prisma -- prisma-mcp-server"
+        stages: [lld, implement]
+        url: "https://github.com/prisma/prisma-mcp"
+
+  # ── Search & Research ───────────────────────────────────────────────────────
+
+  search:
+    label: "Search & Research"
+    tools:
+      - name: web-search-mcp
+        description: "Web search — Brave Search API. Research APIs, libraries, best practices."
+        install: "npx @anthropic/claude-code mcp add brave-search -- npx @modelcontextprotocol/server-brave-search"
+        env: "BRAVE_API_KEY"
+        stages: [requirement, hld]
+        url: "https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search"
+
+      - name: context7
+        description: "Library documentation lookup. Fetches up-to-date docs for npm, PyPI, crates.io packages."
+        install: "npx @anthropic/claude-code mcp add context7 -- npx @context7/mcp-server"
+        stages: [requirement, hld, implement]
+        url: "https://context7.com"
+
+      - name: web-fetch-mcp
+        description: "Fetch any URL content. Read documentation, API specs, web pages."
+        install: "npx @anthropic/claude-code mcp add fetch -- npx @modelcontextprotocol/server-fetch"
+        stages: [requirement, hld, docs]
+        url: "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch"
+
+  # ── Containers & Infrastructure ─────────────────────────────────────────────
+
+  infrastructure:
+    label: "Containers & Infrastructure"
+    tools:
+      - name: docker-mcp
+        description: "Docker — build, run, manage containers and images. Useful for staging validation."
+        install: "npx @anthropic/claude-code mcp add docker -- npx @modelcontextprotocol/server-docker"
+        stages: [staging, implement]
+        url: "https://github.com/modelcontextprotocol/servers"
+
+      - name: kubernetes-mcp
+        description: "Kubernetes — inspect pods, deployments, services. Read cluster state."
+        install: "npx @anthropic/claude-code mcp add k8s -- npx @modelcontextprotocol/server-kubernetes"
+        stages: [staging]
+        url: "https://github.com/modelcontextprotocol/servers"
+
+  # ── Observability ───────────────────────────────────────────────────────────
+
+  observability:
+    label: "Observability"
+    tools:
+      - name: grafana-mcp
+        description: "Grafana — query dashboards, datasources, alerts. Verify observability setup."
+        install: "npx @anthropic/claude-code mcp add grafana -- npx @grafana/mcp-server"
+        env: "GRAFANA_URL, GRAFANA_API_KEY"
+        stages: [observe, staging]
+        url: "https://github.com/grafana/mcp-grafana"
+
+      - name: prometheus-mcp
+        description: "Prometheus — query metrics, check alert rules. Verify metrics are flowing."
+        install: "npx @anthropic/claude-code mcp add prometheus -- npx @prometheus/mcp-server"
+        env: "PROMETHEUS_URL"
+        stages: [observe, staging]
+        url: "https://github.com/prometheus/mcp-prometheus"
+
+      - name: sentry-mcp
+        description: "Sentry — view errors, issues, performance data. Error tracking integration."
+        install: "npx @anthropic/claude-code mcp add sentry -- npx @sentry/mcp-server"
+        env: "SENTRY_AUTH_TOKEN"
+        stages: [staging, retro]
+        url: "https://github.com/getsentry/sentry-mcp"
+
+  # ── Testing ─────────────────────────────────────────────────────────────────
+
+  testing:
+    label: "Testing"
+    tools:
+      - name: playwright-mcp
+        description: "Playwright — browser automation for E2E tests. Navigate, interact, screenshot."
+        install: "npx @anthropic/claude-code mcp add playwright -- npx @anthropic/mcp-playwright"
+        stages: [staging, implement]
+        url: "https://github.com/anthropics/mcp-playwright"
+
+  # ── AI & Code Quality ──────────────────────────────────────────────────────
+
+  code_quality:
+    label: "AI & Code Quality"
+    tools:
+      - name: eslint-mcp
+        description: "ESLint — lint JavaScript/TypeScript code via MCP. Auto-fix available."
+        install: "npx @anthropic/claude-code mcp add eslint -- npx @anthropic/mcp-eslint"
+        stages: [review, implement]
+        url: "https://github.com/anthropics/mcp-eslint"
+
+      - name: sequential-thinking
+        description: "Structured reasoning — step-by-step problem decomposition for complex design decisions."
+        install: "npx @anthropic/claude-code mcp add thinking -- npx @modelcontextprotocol/server-sequential-thinking"
+        stages: [hld, lld, requirement]
+        url: "https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking"
+
+  # ── Communication ───────────────────────────────────────────────────────────
+
+  communication:
+    label: "Communication"
+    tools:
+      - name: slack-mcp
+        description: "Slack — send messages, read channels. Notify team of deployments, reviews."
+        install: "npx @anthropic/claude-code mcp add slack -- npx @modelcontextprotocol/server-slack"
+        env: "SLACK_BOT_TOKEN"
+        stages: [staging, retro]
+        url: "https://github.com/modelcontextprotocol/servers/tree/main/src/slack"
+
+      - name: linear-mcp
+        description: "Linear — manage issues, projects, cycles. Sync workflow stages with Linear issues."
+        install: "npx @anthropic/claude-code mcp add linear -- npx @linear/mcp-server"
+        env: "LINEAR_API_KEY"
+        stages: [requirement, implement, review]
+        url: "https://github.com/linear/linear-mcp"
+
+      - name: notion-mcp
+        description: "Notion — read/write pages, databases. Sync design documents with Notion."
+        install: "npx @anthropic/claude-code mcp add notion -- npx @notionhq/mcp-server"
+        env: "NOTION_API_KEY"
+        stages: [requirement, docs]
+        url: "https://github.com/notionhq/notion-mcp"

@@ -1,6 +1,10 @@
 ---
 description: Technical documentation specialist. Updates README, API docs, runbooks, migration guides, dashboards-as-code. Write access, no bash.
 mode: subagent
+# model: controls which LLM this agent uses.
+# Managed by /preferences (workflow.models.documenter). Sync runs automatically on preference change.
+# Common values: opus | sonnet | haiku (or provider-prefixed: anthropic/claude-sonnet-4-5)
+model: sonnet
 temperature: 0.2
 tools:
   bash: false

@@ -1,6 +1,10 @@
 ---
 description: Code review specialist. Reviews for correctness, security, error handling, readability, and performance. Read-only with bash for tests/linters.
 mode: subagent
+# model: controls which LLM this agent uses.
+# Managed by /preferences (workflow.models.reviewer). Sync runs automatically on preference change.
+# Common values: opus | sonnet | haiku (or provider-prefixed: anthropic/claude-opus-4)
+model: sonnet
 temperature: 0.1
 tools:
   write: false

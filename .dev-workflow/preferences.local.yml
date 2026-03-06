@@ -1,0 +1,8 @@
+# Personal Preferences (not committed to git)
+# Override team preferences for your local development environment.
+# This file is gitignored.
+
+# Example overrides:
+# staging:
+#   url: http://localhost:3000
+#   deploy_command: "npm run dev"

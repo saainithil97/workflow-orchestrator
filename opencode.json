@@ -1,0 +1,12 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    ".claude/rules/preamble.md",
+    ".claude/rules/workflow.md",
+    ".claude/rules/tdd.md",
+    ".claude/rules/code-quality.md",
+    ".claude/rules/observability.md",
+    ".claude/rules/documentation.md",
+    ".claude/rules/tech-debt.md"
+  ]
+}
