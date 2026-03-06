@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Implement LLD tasks using strict Test-Driven Development (Red-Green-Refactor). Computes execution waves from the task dependency graph and runs independent tasks in parallel. Includes OTel instrumentation, structured logging, and metrics. Use after LLD is approved.
+description: Implement LLD tasks using strict Test-Driven Development (Red-Green-Refactor). Computes execution waves from the task dependency graph and runs every task as a forked agent — the orchestrator never writes code directly. Includes OTel instrumentation, structured logging, and metrics. Use after LLD is approved.
 argument-hint: "[feature-name]"
 context: fork
 agent: implementer
@@ -8,7 +8,9 @@ agent: implementer
 
 # TDD Implementation
 
-You are implementing feature: **$ARGUMENTS**
+You are the **orchestrator** for implementing feature: **$ARGUMENTS**
+
+Your role is to plan, dispatch, verify, and record. You do NOT write implementation code or tests directly — every task is executed by a forked implementer agent in its own isolated context.
 
 ## Before You Start
 
@@ -51,98 +53,64 @@ Parse the `tasks` array from the LLD frontmatter. Build execution waves using to
 **Print the computed wave plan before executing**, e.g.:
 ```
 Execution plan for '$ARGUMENTS':
-  Wave 1 (sequential): Task 1 — Data model
-  Wave 2 (sequential): Task 2 — Repository layer
-  Wave 3 (parallel):   Task 3 — Service layer
-                       Task 4 — Event publisher
-  Wave 4 (sequential): Task 5 — API handler
-  Wave 5 (sequential): Task 6 — Integration tests
+  Wave 1 (1 task):  Task 1 — Data model
+  Wave 2 (1 task):  Task 2 — Repository layer
+  Wave 3 (2 tasks): Task 3 — Service layer
+                    Task 4 — Event publisher
+  Wave 4 (1 task):  Task 5 — API handler
+  Wave 5 (1 task):  Task 6 — Integration tests
 ```
 
 Ask the developer to confirm the wave plan, or let you proceed automatically.
 
 ### Step 3: Execute Waves
 
-For each wave in order:
+For each wave in order, **always fork** — one Task tool invocation per task in the wave, regardless of whether the wave has one task or many.
 
-#### If the wave has ONE task — run it directly in this context:
-
-Follow the TDD cycle (Steps 4a–4e below) for that task.
-
-#### If the wave has MULTIPLE tasks — run them in parallel:
-
-Launch one Task tool invocation per task in the wave. Each invocation runs a forked implementer agent with these instructions:
+Launch each invocation as a forked implementer agent with these instructions (fill in the bracketed values per task):
 
 ```
 You are implementing a single task from the LLD for feature '$ARGUMENTS'.
 
-Read docs/lld/$ARGUMENTS.md to understand the full feature context.
+Your role is implementer — you write code and tests. Do NOT orchestrate other agents.
 
-Your ONLY job is Task [N]: [description]
-- Files: [file list]
+Read docs/lld/$ARGUMENTS.md to understand the full feature context, then focus exclusively on:
+
+Task [N]: [description]
+- Files to write: [file list from LLD]
 - Depends on: [prerequisites — already complete]
 - Test approach: [from LLD]
 - Observability: [from LLD]
-- Acceptance: [from LLD]
+- Acceptance criteria: [from LLD]
 
-Follow the TDD cycle exactly:
-1. Red: Write failing tests for this task. Verify they fail.
-2. Green: Write minimum implementation. Verify tests pass. Verify no regressions in THIS task's test file.
-3. Refactor: Improve structure. Run this task's tests after every change.
-4. Instrument: Add OTel spans, logs, metrics per observability spec.
+## TDD Cycle
 
-Do NOT run the full test suite — the orchestrating agent will do that after all parallel tasks complete.
-Do NOT update the LLD task status — the orchestrating agent will do that after validating the wave.
+### Red — Write Failing Tests
+1. Create or open the test file(s) for this task
+2. Write tests covering:
+   - Happy path
+   - Edge cases (empty input, boundary values, null)
+   - Error cases (invalid input, downstream failures)
+   - Security cases if applicable (injection, unauthorized access)
+3. Run ONLY this task's tests
+4. Verify they FAIL. If any pass without implementation, the test is not testing new behaviour — revise it.
 
-Return: task ID, status (complete | blocked), summary of what was implemented, any issues encountered.
-```
+### Green — Write Minimal Implementation
+1. Write the MINIMUM code to make the failing tests pass
+2. Do NOT add extra functionality, performance optimisations, or error handling beyond what tests require
+3. Run this task's tests — verify they all PASS
+4. Run ONLY this task's tests for regression check (the orchestrator runs the full suite after the wave)
 
-Wait for ALL parallel task invocations to complete before proceeding.
-
-#### After every wave (sequential or parallel):
-
-1. **Run the full test suite.** This catches regressions introduced by parallel tasks interacting at runtime.
-2. If the suite fails: identify which task caused the regression, fix it before proceeding to the next wave.
-3. **Update the LLD** for all tasks completed in this wave:
-   - Set `status: complete` in both frontmatter and body
-   - Set `tests_passing: true`
-   - Recalculate `completion.percentage`
-
-### Step 4: TDD Cycle (for sequential tasks)
-
-For tasks run directly (single-task waves), follow this exact sequence:
-
-#### 4a. Red — Write Failing Tests
-
-1. Create or open the test file specified in the task
-2. Write tests that describe the expected behavior:
-   - Happy path test
-   - Edge case tests (empty input, boundary values, null)
-   - Error case tests (invalid input, failures)
-   - Security tests if applicable (injection, unauthorized access)
-3. Run ONLY the new tests
-4. **Verify they FAIL.** If any pass without implementation, the test is not testing new behaviour — revise it
-
-#### 4b. Green — Write Minimal Implementation
-
-1. Write the MINIMUM code to make all failing tests pass
-2. Do NOT add extra functionality, performance optimizations, or error handling beyond what the tests check
-3. Run the new tests — **verify they all PASS**
-4. Run the FULL test suite — **verify no regressions**
-5. If regressions occur: fix them before proceeding, note the cause in learnings
-
-#### 4c. Refactor
-
-1. With all tests green, improve the code:
+### Refactor
+1. With tests green, improve the code:
    - Remove duplication
-   - Improve naming (make it self-documenting)
-   - Simplify logic (reduce nesting, extract helper functions)
-   - Ensure consistency with existing code patterns
-2. After EVERY refactor change, run the full test suite
-3. Tests must stay green throughout. If a test breaks, undo the refactor.
+   - Improve naming (self-documenting)
+   - Simplify logic (reduce nesting, extract helpers)
+   - Ensure consistency with existing patterns
+2. After EVERY change, re-run this task's tests
+3. Tests must stay green throughout — if a test breaks, undo the refactor
 
-#### 4d. Instrument
-
+### Instrument
 1. Add OpenTelemetry spans as specified in the observability spec for this task
 2. Add structured log statements at:
    - Entry/exit points of the new code path
@@ -150,38 +118,61 @@ For tasks run directly (single-task waves), follow this exact sequence:
    - Significant business events
 3. Add metrics as specified (counters for events, histograms for durations)
 4. Ensure trace context propagation (trace_id, span_id in logs)
-5. Run the full test suite — instrumentation must not break tests
+5. Run this task's tests — instrumentation must not break them
 
-#### 4e. Complete Task
+## Rules
+- NEVER skip the Red phase. Every line of production code must be driven by a failing test.
+- NEVER modify a test to make it pass (unless the test is provably wrong — explain why).
+- NEVER run the full test suite — the orchestrating agent does that after the wave completes.
+- NEVER update the LLD task status — the orchestrating agent does that after validating the wave.
+- If you encounter a blocking issue (missing dependency, unexpected interface mismatch, conflicting type), stop immediately and report it — do not try to work around it silently.
 
-1. Update `docs/lld/$ARGUMENTS.md` using the task tracking schema in `.dev-workflow/references/workflow-schemas.md`:
-   - Set task `status: complete` in both frontmatter and body
+## Return
+When complete, return:
+- Task ID: [N]
+- Status: complete | blocked
+- Files written: [list]
+- Tests written: [list]
+- Summary: [1-2 sentences on what was implemented]
+- Issues: [any problems encountered, or "none"]
+```
+
+Wait for ALL forked agents in the wave to complete before proceeding.
+
+#### After every wave:
+
+1. **Run the full test suite.** This is the orchestrator's primary job — catching regressions where tasks interact at runtime. Forked agents only run their own tests; this is the first time the full suite runs with the wave's changes in place.
+2. If the suite fails: identify which task caused the regression (git diff per task's files, then bisect). Fix before proceeding to the next wave.
+3. **Update the LLD** for all tasks completed in this wave:
+   - Set `status: complete` in both frontmatter and body
    - Set `tests_passing: true`
-2. Recalculate `completion.percentage` in frontmatter
+   - Recalculate `completion.percentage`
+4. **Record the wave result** — one line per task: `Wave N | Task M | complete | <summary>`
 
-### Step 5: After All Waves Complete
+Discard the forked agents' full output from context — carry only the one-line records forward.
+
+### Step 4: After All Waves Complete
 
 1. Run the full test suite with coverage report
 2. Check coverage against targets from preferences (default: >90% branch for new code)
-3. If coverage is below target, add additional tests
+3. If coverage is below target, fork an additional implementer agent to add the missing tests
 4. Verify all tasks in the LLD have `status: complete` and `tests_passing: true`
-5. Update the LLD frontmatter: all tasks complete, overall status reflects implementation done
+5. Update the LLD frontmatter: overall status reflects implementation done
 6. Note any deviations from the LLD design in a `## Implementation Notes` section
 
-### Step 6: Update Learnings
+### Step 5: Update Learnings
 
-If anything unexpected happened during implementation (edge cases, dependency surprises, test patterns that worked well, parallel conflicts encountered), add a dated entry to `.dev-workflow/learnings/LEARNINGS.md`.
+If anything unexpected happened during implementation (edge cases, dependency surprises, test patterns that worked well, wave conflicts encountered), add a dated entry to `.dev-workflow/learnings/LEARNINGS.md`.
 
 ## Rules
 
-- NEVER skip the Red phase. Every line of implementation code must be driven by a failing test.
-- NEVER modify a test to make it pass (unless the test itself is wrong — explain why).
-- NEVER let parallel task agents run the full suite — they run only their own tests; the wave orchestrator runs the full suite after the wave.
-- ALWAYS run the full test suite after every wave completes. Regressions are caught at wave boundaries.
-- ALWAYS check for existing test utilities, fixtures, and helpers before creating new ones.
-- ALWAYS follow the project's existing code style and patterns.
-- A parallel task agent that encounters a blocking issue (missing dependency, unexpected interface) reports it back immediately — the wave orchestrator decides whether to abort or work around it.
+- NEVER write implementation code or tests directly in the orchestrator context — always fork.
+- NEVER let forked agents run the full test suite — that is the orchestrator's responsibility, after each wave.
+- NEVER let forked agents update the LLD — the orchestrator updates it after validating the wave.
+- ALWAYS run the full test suite after every wave. Regressions are caught at wave boundaries, not inside tasks.
+- A forked agent that hits a blocking issue reports it immediately — the orchestrator decides whether to abort the wave, skip the task, or replan.
+- Discard forked agent output after recording the one-line summary — the orchestrator context must stay lean.
 
 ## Output
 
-All implementation code and tests written, LLD tasks checked off, coverage report generated.
+All implementation code and tests written by forked agents, LLD tasks checked off by orchestrator, coverage report generated.
