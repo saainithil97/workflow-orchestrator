@@ -1,9 +1,11 @@
 ---
-description: Implement LLD tasks using strict TDD (Red-Green-Refactor) with OTel instrumentation
+description: Implement LLD tasks using wave-based parallel TDD — orchestrator forks one agent per task, never writes code directly
 agent: build
 ---
 
 Implement feature: $ARGUMENTS using strict Test-Driven Development.
+
+You are the **orchestrator**. You compute waves, fork implementer agents, validate results, and update the LLD. You do NOT write implementation code or tests directly.
 
 ## Gate Check
 
@@ -15,37 +17,52 @@ Read `docs/lld/$ARGUMENTS.md`. Verify: `status: approved|complete`, `completion.
 2. Read `.dev-workflow/learnings/LEARNINGS.md`
 3. Read `docs/lld/$ARGUMENTS.md` completely and `docs/observability/$ARGUMENTS.md`
 
-## TDD Cycle — For Each Task
+## Step 1: Compute Execution Waves
 
-Find the next `pending` task whose dependencies are all `complete`.
+Parse the `tasks` array from the LLD frontmatter. Build waves via topological sort:
+1. Wave 1 = tasks with empty `depends_on`
+2. Wave N = tasks whose dependencies are all in waves ≤ N-1
+3. **File conflict check**: if two tasks in the same wave write to the same file, bump the later one to the next wave
 
-### Red
-1. Write failing tests: happy path, edge cases, error cases, security cases
-2. Run tests — they MUST fail
-3. If they pass, the test is wrong — revise it
+Print the wave plan and ask the developer to confirm or proceed automatically.
 
-### Green
-1. Write MINIMUM code to pass the tests
-2. No extra functionality, no optimization
-3. Run tests — MUST pass. Run full suite — no regressions
+## Step 2: Execute Each Wave
 
-### Refactor
-1. Improve code structure while keeping tests green
-2. Run full suite after EVERY change
+For every wave — whether it has one task or many — fork one agent per task with these instructions:
 
-### Instrument
-1. Add OTel spans per observability spec
-2. Add structured logs at boundaries and error paths
-3. Add metrics for business events
-4. Run full suite — instrumentation must not break tests
+```
+You are implementing Task [N]: [description] for feature '$ARGUMENTS'.
+Read docs/lld/$ARGUMENTS.md for context, then focus on this task only.
+Files: [list] | Depends on: [prerequisites — already complete]
+Test approach: [from LLD] | Acceptance: [from LLD]
 
-### Complete
-1. Update LLD: task `status: complete`, `tests_passing: true`
-2. Recalculate `completion.percentage`
-3. Move to next task
+TDD cycle:
+  Red:       Write failing tests (happy path, edge, error, security). Verify they FAIL.
+  Green:     Write minimum code. Verify tests PASS. Do NOT run the full suite.
+  Refactor:  Improve structure. Re-run this task's tests after every change.
+  Instrument: Add OTel spans, structured logs, metrics per observability spec.
 
-## After All Tasks
+Rules:
+  - Run ONLY this task's tests — the orchestrator runs the full suite after the wave
+  - Do NOT update the LLD — the orchestrator does that after validating the wave
+  - If blocked (missing dependency, interface mismatch), report immediately — do not workaround silently
+
+Return: task ID, status (complete|blocked), files written, summary, issues.
+```
+
+Wait for ALL agents in the wave to complete.
+
+## Step 3: After Every Wave
+
+1. **Run the full test suite** — catches runtime regressions between tasks
+2. If suite fails: identify the offending task and fix before proceeding
+3. **Update the LLD**: set `status: complete`, `tests_passing: true` for each completed task; recalculate `completion.percentage`
+4. Record one line per task: `Wave N | Task M | complete | <summary>` — discard the rest
+
+## After All Waves
 
 1. Run full test suite with coverage
 2. Verify coverage meets targets from preferences
-3. Update learnings with any surprises or discoveries
+3. Verify all tasks `status: complete` and `tests_passing: true`
+4. Add `## Implementation Notes` to the LLD for any deviations from the design
+5. Update learnings with any surprises or wave conflicts
