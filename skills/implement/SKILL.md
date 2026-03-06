@@ -48,6 +48,8 @@ Parse the `tasks` array from the LLD frontmatter. Build execution waves using to
 2. A task enters Wave N if all its dependencies are in waves ≤ N-1.
 3. Tasks with the same wave number are candidates for parallel execution.
 
+**Cycle detection:** Before executing, verify no circular `depends_on` exists (e.g., task A → task B → task A). If a cycle is detected, stop immediately — report which tasks form the cycle and ask the developer to fix the LLD before proceeding.
+
 **File conflict check (CRITICAL):** Before finalising any wave, inspect the `files` list of every task in that wave. If two tasks in the same wave write to the **same file path**, split the later task into the next wave. Read-only file access (reading an existing file) is never a conflict.
 
 **Print the computed wave plan before executing**, e.g.:
@@ -65,7 +67,9 @@ Ask the developer to confirm the wave plan, or let you proceed automatically.
 
 ### Step 3: Execute Waves
 
-For each wave in order, **always fork** — one Task tool invocation per task in the wave, regardless of whether the wave has one task or many.
+**Rule: always fork.** Every task in every wave runs as a forked agent — including single-task waves. The orchestrator never writes implementation code or tests directly.
+
+For each wave in order, launch one Task tool invocation per task in the wave:
 
 Launch each invocation as a forked implementer agent with these instructions (fill in the bracketed values per task):
 
@@ -132,7 +136,6 @@ When complete, return:
 - Task ID: [N]
 - Status: complete | blocked
 - Files written: [list]
-- Tests written: [list]
 - Summary: [1-2 sentences on what was implemented]
 - Issues: [any problems encountered, or "none"]
 ```
@@ -142,7 +145,7 @@ Wait for ALL forked agents in the wave to complete before proceeding.
 #### After every wave:
 
 1. **Run the full test suite.** This is the orchestrator's primary job — catching regressions where tasks interact at runtime. Forked agents only run their own tests; this is the first time the full suite runs with the wave's changes in place.
-2. If the suite fails: identify which task caused the regression (git diff per task's files, then bisect). Fix before proceeding to the next wave.
+2. If the suite fails: identify which task caused the regression by checking each wave task's changed files against the failing test. Fork a targeted fix agent scoped to those files — do not fix regressions directly in the orchestrator context. Re-run the full suite after the fix before proceeding to the next wave.
 3. **Update the LLD** for all tasks completed in this wave:
    - Set `status: complete` in both frontmatter and body
    - Set `tests_passing: true`
@@ -155,7 +158,7 @@ Discard the forked agents' full output from context — carry only the one-line 
 
 1. Run the full test suite with coverage report
 2. Check coverage against targets from preferences (default: >90% branch for new code)
-3. If coverage is below target, fork an additional implementer agent to add the missing tests
+3. If coverage is below target, fork an additional implementer agent. Pass it: the list of uncovered files/branches from the coverage report, the relevant LLD task IDs that own those files, and their acceptance criteria. It writes only additional tests — no new implementation.
 4. Verify all tasks in the LLD have `status: complete` and `tests_passing: true`
 5. Update the LLD frontmatter: overall status reflects implementation done
 6. Note any deviations from the LLD design in a `## Implementation Notes` section
@@ -170,7 +173,10 @@ If anything unexpected happened during implementation (edge cases, dependency su
 - NEVER let forked agents run the full test suite — that is the orchestrator's responsibility, after each wave.
 - NEVER let forked agents update the LLD — the orchestrator updates it after validating the wave.
 - ALWAYS run the full test suite after every wave. Regressions are caught at wave boundaries, not inside tasks.
-- A forked agent that hits a blocking issue reports it immediately — the orchestrator decides whether to abort the wave, skip the task, or replan.
+- A forked agent that hits a blocking issue reports it immediately. The orchestrator then decides:
+  - **Abort the wave**: if the blocked task is depended on by other tasks in this wave or the next — stop, report, ask the developer to fix the LLD or unblock the dependency.
+  - **Skip the task**: only if no other task depends on it and the block is environmental (e.g., missing external service) — mark it `blocked` in the LLD and continue remaining waves.
+  - **Replan**: if the block reveals a design gap — update the LLD task list and recompute waves before continuing.
 - Discard forked agent output after recording the one-line summary — the orchestrator context must stay lean.
 
 ## Output

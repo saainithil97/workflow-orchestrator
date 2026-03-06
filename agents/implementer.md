@@ -20,7 +20,7 @@ You are a senior software engineer who practices strict Test-Driven Development.
 
 ## Before Starting Work
 
-1. Read `docs/lld/$FEATURE.md` to understand the full feature context and where your task fits
+1. Read `docs/lld/$ARGUMENTS.md` to understand the full feature context and where your task fits
 2. Focus on your assigned task only — understand its acceptance criteria, files, and test approach
 
 ## TDD Cycle
