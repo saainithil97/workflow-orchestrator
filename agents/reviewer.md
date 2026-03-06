@@ -2,7 +2,7 @@
 name: reviewer
 description: Code review specialist. Reviews code for correctness, security, error handling, readability, and performance. Read-only with bash access for running tests and linters.
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: anthropic/claude-sonnet-4-6
 memory: project
 ---
 

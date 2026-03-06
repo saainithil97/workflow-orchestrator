@@ -2,7 +2,7 @@
 name: implementer
 description: TDD implementation specialist. Use for implementing tasks from the LLD using strict Red-Green-Refactor methodology. Full tool access for writing code and running tests.
 tools: Read, Write, Edit, Bash, Grep, Glob
-model: sonnet
+model: anthropic/claude-sonnet-4-6
 memory: project
 ---
 

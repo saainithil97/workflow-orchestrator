@@ -2,7 +2,7 @@
 name: documenter
 description: Technical documentation specialist. Updates README, API docs, runbooks, migration guides, dashboards-as-code, and ensures design documents match implementation. Write access, no bash.
 tools: Read, Write, Edit, Grep, Glob
-model: sonnet
+model: anthropic/claude-sonnet-4-6
 memory: project
 ---
 

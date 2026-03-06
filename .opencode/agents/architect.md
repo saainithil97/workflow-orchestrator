@@ -4,7 +4,7 @@ mode: subagent
 # model: controls which LLM this agent uses.
 # Managed by /preferences (workflow.models.architect). Sync runs automatically on preference change.
 # Common values: opus | sonnet | haiku (or provider-prefixed: anthropic/claude-opus-4)
-model: sonnet
+model: anthropic/claude-sonnet-4-6
 temperature: 0.1
 tools:
   write: false

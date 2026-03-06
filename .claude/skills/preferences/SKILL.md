@@ -290,11 +290,11 @@ workflow:
       - [observe, staging]   # run concurrently after review passes
       - [docs, retro]        # run concurrently after staging passes
   models:
-    architect: opus
-    implementer: sonnet
-    reviewer: opus
-    documenter: sonnet
-    default: sonnet
+    architect: anthropic/claude-opus-4-6
+    implementer: anthropic/claude-sonnet-4-6
+    reviewer: anthropic/claude-opus-4-6
+    documenter: anthropic/claude-sonnet-4-6
+    default: anthropic/claude-sonnet-4-6
   max_learnings: 20
 
 staging:

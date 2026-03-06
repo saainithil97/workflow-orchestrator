@@ -2,7 +2,7 @@
 name: architect
 description: System design and architecture specialist. Use for requirement gathering, high-level design, low-level design, and codebase analysis. Read-only — does not modify code.
 tools: Read, Grep, Glob
-model: sonnet
+model: anthropic/claude-sonnet-4-6
 memory: project
 ---
 
