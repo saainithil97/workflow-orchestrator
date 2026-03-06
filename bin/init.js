@@ -8,10 +8,12 @@
  * additions and preserving existing preferences/learnings.
  *
  * Usage:
- *   npx @dev-workflow/kit init [--force]
+ *   npx @dev-workflow/kit init [--force] [--claude-only] [--opencode-only]
  *
  * Flags:
- *   --force   Overwrite existing files (except preserved files)
+ *   --force          Overwrite existing files (except preserved files)
+ *   --claude-only    Skip .opencode/ files (for Claude Code-only projects)
+ *   --opencode-only  Skip .claude/rules/ and .claude/skills/ (for OpenCode-only projects)
  */
 
 const fs = require('fs');
@@ -35,6 +37,16 @@ const GITIGNORE_ADDITIONS_FILE = path.join(SCAFFOLD_DIR, '.gitignore-additions')
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * Recursively copy files from src to dest, preserving directory structure.
+ * Skips preserved files (e.g., preferences, learnings) and existing files
+ * unless --force is set. Labels each file as CREATE or UPDATE.
+ *
+ * @param {string} src - Source directory or file path
+ * @param {string} dest - Destination directory or file path
+ * @param {boolean} force - If true, overwrite existing non-preserved files
+ * @param {string[]} preserved - Relative paths that should never be overwritten
+ */
 function copyRecursive(src, dest, force, preserved) {
   const stats = fs.statSync(src);
 
@@ -73,6 +85,11 @@ function copyRecursive(src, dest, force, preserved) {
   }
 }
 
+/**
+ * Merge dev-workflow .gitignore entries into the project's .gitignore.
+ * Reads additions from scaffold/.gitignore-additions, deduplicates against
+ * existing entries, and appends any new lines under a labelled block.
+ */
 function mergeGitignore() {
   if (!fs.existsSync(GITIGNORE_ADDITIONS_FILE)) return;
 
@@ -143,10 +160,29 @@ const CLAUDE_SPECIFIC_PATHS = [
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Check whether a relative path should be excluded based on platform flags.
+ * Matches exact paths and path prefixes (e.g., '.opencode' matches '.opencode/commands/foo.md').
+ *
+ * @param {string} relativePath - Path relative to the project root
+ * @param {string[]} excludedPaths - Prefixes to exclude (from OPENCODE_SPECIFIC_PATHS or CLAUDE_SPECIFIC_PATHS)
+ * @returns {boolean} True if the path should be skipped
+ */
 function isExcluded(relativePath, excludedPaths) {
   return excludedPaths.some(p => relativePath === p || relativePath.startsWith(p + '/'));
 }
 
+/**
+ * Like copyRecursive, but also filters out paths matching excludedPaths.
+ * Used when --claude-only or --opencode-only flags are set to skip
+ * platform-specific files during scaffold copy.
+ *
+ * @param {string} src - Source directory or file path
+ * @param {string} dest - Destination directory or file path
+ * @param {boolean} force - If true, overwrite existing non-preserved files
+ * @param {string[]} preserved - Relative paths that should never be overwritten
+ * @param {string[]} excludedPaths - Path prefixes to skip (platform-specific files)
+ */
 function copyRecursiveFiltered(src, dest, force, preserved, excludedPaths) {
   const stats = fs.statSync(src);
 

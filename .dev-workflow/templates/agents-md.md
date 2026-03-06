@@ -77,6 +77,8 @@ All documents in `docs/` (requirements, hld, lld, adr, runbooks, migrations, das
 | `/staging <name>` | Deploy to staging, run integration tests, validate |
 | `/docs <name>` | Update all documentation |
 | `/retro <name>` | Retrospective — capture learnings and feedback |
+| `/status <name>` | Show pipeline progress for a feature |
+| `/reset <name> [stage\|task] [options]` | Manually fix pipeline state |
 | `/doctor` | Scan codebase for tech debt |
 | `/onboard` | Regenerate CLAUDE.md and AGENTS.md with fresh analysis |
 | `/preferences` | View or update developer/team preferences |

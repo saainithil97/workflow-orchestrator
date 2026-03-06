@@ -49,8 +49,8 @@ npx @dev-workflow/kit init
 This copies the project-local files into your project:
 - `.dev-workflow/` — templates, preferences, learnings, tools catalog
 - `.claude/rules/` — 9 shared rule files (workflow, TDD, code quality, tech debt, etc.)
-- `.claude/skills/` — 15 skill files (OpenCode reads `.claude/skills/*/SKILL.md` natively)
-- `.opencode/commands/` — 15 command files mirroring Claude Code skills
+- `.claude/skills/` — 17 skill directories (OpenCode reads `.claude/skills/*/SKILL.md` natively)
+- `.opencode/commands/` — 17 command files mirroring Claude Code skills
 - `.opencode/agents/` — 4 agent files (architect, implementer, reviewer, documenter)
 - `docs/` — 8 documentation subdirectories
 - `opencode.json` — config referencing shared rules
@@ -89,7 +89,7 @@ cd /path/to/your-project
 npx /path/to/dev-workflow-kit init
 ```
 
-All methods accept `--force` to overwrite existing files. User data (preferences, learnings, tech debt) is always preserved regardless of `--force`.
+All methods accept `--force` to overwrite existing files, `--claude-only` to skip `.opencode/` files, and `--opencode-only` to skip `.claude/rules/` and `.claude/skills/`. User data (preferences, learnings, tech debt) is always preserved regardless of `--force`.
 
 #### What gets created
 
@@ -99,7 +99,7 @@ After running init, your project will contain:
 your-project/
 ├── .claude/
 │   ├── rules/              # 9 rule files (pipeline, TDD, code quality, etc.)
-│   └── skills/             # 15 skill directories (one SKILL.md each)
+│   └── skills/             # 17 skill directories (one SKILL.md each)
 ├── .dev-workflow/
 │   ├── preferences.yml     # Team preferences (committed)
 │   ├── preferences.local.yml  # Personal overrides (gitignored)
@@ -110,7 +110,7 @@ your-project/
 │   └── templates/          # 10 document templates
 ├── .opencode/
 │   ├── agents/             # 4 agent definitions
-│   └── commands/           # 15 command files
+│   └── commands/           # 17 command files
 ├── docs/                   # 8 empty doc subdirectories with .gitkeep
 ├── opencode.json           # OpenCode config
 └── .gitignore              # Updated with dev-workflow entries
@@ -317,7 +317,7 @@ This is woven into the preamble (step 4), the implementer agent (refactor phase)
 your-project/
 ├── .claude/
 │   ├── rules/              # 9 rule files (workflow, TDD, code quality, tech debt, etc.)
-│   └── skills/             # 15 skills (requirement, HLD, LLD, implement, doctor, onboard, etc.)
+│   └── skills/             # 17 skills (requirement, HLD, LLD, implement, status, reset, doctor, onboard, etc.)
 │       └── */SKILL.md      # OpenCode auto-discovers these as agent skills
 ├── .dev-workflow/
 │   ├── templates/          # Document templates (requirement, HLD, LLD, ADR, etc.)
@@ -329,7 +329,7 @@ your-project/
 │   └── learnings/
 │       └── LEARNINGS.md    # Session-to-session learning log
 ├── .opencode/              # (OpenCode users only)
-│   ├── commands/           # 15 command files
+│   ├── commands/           # 17 command files
 │   └── agents/             # 4 agent files
 ├── docs/
 │   ├── requirements/       # Requirement documents

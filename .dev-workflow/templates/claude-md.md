@@ -115,6 +115,8 @@ Load on a need-to-know basis:
 | `/staging <name>` | Deploy to staging, run integration tests |
 | `/docs <name>` | Update all documentation |
 | `/retro <name>` | Retrospective — capture learnings |
+| `/status <name>` | Show pipeline progress for a feature |
+| `/reset <name> [stage\|task] [options]` | Manually fix pipeline state |
 | `/doctor` | Scan codebase for tech debt |
 | `/onboard` | Regenerate this file with fresh analysis |
 | `/preferences` | View or update preferences |
