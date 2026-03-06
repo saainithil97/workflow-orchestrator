@@ -1,6 +1,10 @@
 ---
 description: System design and architecture specialist. Use for requirement gathering, HLD, LLD, and codebase analysis. Read-only.
 mode: subagent
+# model: controls which LLM this agent uses.
+# Managed by /preferences (workflow.models.architect). Sync runs automatically on preference change.
+# Common values: opus | sonnet | haiku (or provider-prefixed: anthropic/claude-opus-4)
+model: sonnet
 temperature: 0.1
 tools:
   write: false

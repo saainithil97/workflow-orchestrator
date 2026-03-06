@@ -2,6 +2,7 @@
 name: retro
 description: Retrospective — capture what went well, what went wrong, and what to do differently. Records learnings, user feedback, and agent mistakes for future sessions. Use after completing a feature or at the end of any session.
 argument-hint: "[feature-name]"
+context: fork
 ---
 
 # Retrospective & Learning
@@ -21,13 +22,23 @@ This is the learning stage. Its output improves all future sessions by recording
 
 This stage has no prerequisites. It can be run at any time — after completing a full workflow, after any individual stage, or at the end of any session.
 
+## Pipeline Skip Check
+
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md`.
+
+If `retro` is **disabled** in the effective pipeline AND this skill was invoked by `/workflow` (not directly by the developer):
+- Print: "Retro stage is disabled in pipeline configuration. Skipping."
+- Exit.
+
+If invoked directly by the developer (`/retro`), always run regardless of pipeline config.
+
 ## Process
 
 ### Step 1: Review the Session
 
 If a feature name is provided, review the design documents:
 1. Read `docs/requirements/$ARGUMENTS.md`
-2. Read `docs/hld/$ARGUMENTS.md`
+2. Read `docs/hld/$ARGUMENTS.md` (if it exists)
 3. Read `docs/lld/$ARGUMENTS.md` (including review notes and staging results)
 4. Review any implementation notes and deviations
 
@@ -114,7 +125,22 @@ This file records lessons learned from past development sessions. Agents MUST re
 ...
 ```
 
-### Step 7: Cross-Reference with Rules
+### Step 7: Rotate Learnings (if needed)
+
+After adding the new entry, count the total number of `##` entries in `LEARNINGS.md`.
+
+Read `workflow.max_learnings` from `.dev-workflow/preferences.yml` (default: 20).
+
+If the entry count exceeds `max_learnings`:
+1. Identify the oldest entries to archive (those beyond the limit)
+2. Create or append to `.dev-workflow/learnings/archive/<YYYY-MM>.md` (current year-month)
+3. Move the overflow entries there, preserving the full entry text
+4. Remove the moved entries from `LEARNINGS.md`
+5. Leave `LEARNINGS.md` with at most `max_learnings` entries
+
+This keeps the auto-loaded context bounded as the project matures.
+
+### Step 8: Cross-Reference with Rules
 
 If any learning suggests a rule change:
 1. Identify which rule file should be updated (`.claude/rules/*.md`)

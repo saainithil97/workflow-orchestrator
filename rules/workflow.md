@@ -2,38 +2,65 @@
 
 ## Pipeline Stages
 
-The development workflow is a strict, sequential pipeline. Each stage produces a document in `docs/` with YAML frontmatter that tracks completion status.
+The default pipeline is sequential. The active set of stages is controlled by `workflow.pipeline` in `.dev-workflow/preferences.yml` and optional per-feature `pipeline_overrides` in the requirement doc.
 
 ```
-1. /requirement  →  docs/requirements/<feature>.md
+1. /requirement  →  docs/requirements/<feature>.md   [MANDATORY]
 2. /hld          →  docs/hld/<feature>.md
-3. /lld          →  docs/lld/<feature>.md
-4. /implement    →  updates code + checks off tasks in LLD
-5. /review       →  appends review findings to LLD
-6. /staging      →  runs integration tests against staging
-7. /docs         →  updates README, API docs, runbooks, dashboards
-8. /retro        →  updates .dev-workflow/learnings/
+3. /lld          →  docs/lld/<feature>.md             [MANDATORY]
+4. /implement    →  updates code + checks off tasks   [MANDATORY]
+5. /review       →  appends review findings to LLD    [MANDATORY]
+6. /observe      →  OTel instrumentation (standalone or pipeline)
+7. /staging      →  integration tests against staging
+8. /docs         →  updates README, API docs, runbooks
+9. /retro        →  updates .dev-workflow/learnings/
 ```
+
+Mandatory stages (`requirement`, `lld`, `implement`, `review`) cannot be disabled. All other stages are configurable.
+
+## Reading Pipeline Configuration
+
+Before starting any stage that might be skipped, read the effective pipeline:
+
+1. Read `workflow.pipeline.preset` from `.dev-workflow/preferences.yml` (default: `standard`).
+2. Resolve the preset to its stage list:
+   - `minimal`: requirement, lld, implement, review
+   - `standard`: requirement, hld, lld, implement, review, docs, retro
+   - `full`: requirement, hld, lld, implement, review, observe, staging, docs, retro
+3. Apply any `workflow.pipeline.<stage>: true|false` overrides from preferences (overrides beat the preset).
+4. If a feature name is given, also check `pipeline_overrides` in `docs/requirements/<feature>.md` frontmatter — these beat project-level overrides.
+5. Mandatory stages are always enabled regardless of any setting.
+
+## Skipped Stage Resolution
+
+When a stage is skipped, the next stage gates on the nearest enabled predecessor:
+
+- If `/hld` is skipped, `/lld` gates on the **requirement** doc instead of the hld doc.
+- If `/observe` is skipped, `/staging` proceeds without an observability pre-check.
+- If `/staging` is skipped, `/docs` gates on review pass (same as if staging had not run).
+
+**Rule**: Gate on the nearest enabled predecessor. Never gate on a skipped stage.
 
 ## Gate Check Protocol
 
-Before starting any stage, the agent MUST run the following gate check:
+Before starting any stage, run the gate check:
 
 ### Step 1: Locate the prerequisite document
 
-| Current Stage | Required Document | Required Status |
-|--------------|-------------------|----------------|
-| `/hld` | `docs/requirements/<feature>.md` | `status: approved` or `status: complete` |
-| `/lld` | `docs/hld/<feature>.md` | `status: approved` or `status: complete` |
-| `/implement` | `docs/lld/<feature>.md` | `status: approved` or `status: complete` |
-| `/review` | `docs/lld/<feature>.md` | All tasks `status: complete` and `tests_passing: true` |
-| `/staging` | `docs/lld/<feature>.md` | `review.status: pass` or `review.status: pass-with-warnings` AND `review.critical_issues: 0` |
-| `/docs` | `docs/lld/<feature>.md` | `review.status: pass` or `review.status: pass-with-warnings` |
+| Current Stage | Normal Gate Document | Required Condition |
+|--------------|----------------------|--------------------|
+| `/hld` | `docs/requirements/<feature>.md` | `status: approved\|complete` |
+| `/lld` | `docs/hld/<feature>.md` (or requirement if hld skipped) | `status: approved\|complete` |
+| `/implement` | `docs/lld/<feature>.md` | `status: approved\|complete` |
+| `/review` | `docs/lld/<feature>.md` | All tasks `status: complete` AND `tests_passing: true` |
+| `/observe` | `docs/lld/<feature>.md` | `review.status: pass\|pass-with-warnings` AND `review.critical_issues: 0` |
+| `/staging` | `docs/lld/<feature>.md` | `review.status: pass\|pass-with-warnings` AND `review.critical_issues: 0` |
+| `/docs` | `docs/lld/<feature>.md` | `review.status: pass\|pass-with-warnings`; if staging ran, also `staging.status: pass` |
 | `/retro` | None | No gate — always allowed |
 
 ### Step 2: Parse YAML frontmatter
 
-Read the prerequisite document and parse its YAML frontmatter. Check ALL of these conditions:
+Check ALL of these conditions on the prerequisite document:
 
 ```yaml
 # ALL must be true:
@@ -74,78 +101,9 @@ completion:
 ---
 ```
 
-### Percentage Calculation
+`completion.percentage` = (items where `done: true`) / (total items) × 100, rounded to nearest integer. Recalculate whenever any checklist item changes.
 
-`completion.percentage` = (number of items where `done: true`) / (total items) * 100, rounded to nearest integer.
-
-The agent MUST recalculate this value whenever it updates any checklist item.
-
-## Implementation Task Tracking
-
-The LLD document contains the task checklist. Each task is tracked in both the YAML frontmatter and the document body:
-
-### Frontmatter Task Schema
-
-```yaml
-tasks:
-  - id: 1
-    description: "<what to build>"
-    files: ["<file paths>"]
-    depends_on: []
-    status: pending | in-progress | complete | blocked
-    tests_passing: false | true
-    reviewed: false | true
-```
-
-### Body Task Format
-
-```markdown
-### Task 1: <Description>
-- **Status**: pending | in-progress | complete | blocked
-- **Files**: `path/to/file.ts`, `path/to/file.test.ts`
-- **Depends on**: None | Task N
-- **Test approach**: <how this task will be tested>
-- **Acceptance**: <what "done" looks like>
-- **Details**: <implementation specifics>
-```
-
-When a task is completed, update BOTH the frontmatter and body simultaneously.
-
-## Review Tracking
-
-After `/review` completes, it appends a review section to the LLD frontmatter:
-
-```yaml
-review:
-  status: pass | pass-with-warnings | fail
-  critical_issues: <count>
-  warnings: <count>
-  suggestions: <count>
-  reviewed_by: <agent-name>
-  reviewed_at: <YYYY-MM-DD>
-  dimensions_checked:
-    - correctness
-    - security
-    - error-handling
-    - readability
-    - performance
-```
-
-## Staging Tracking
-
-After `/staging` completes, it appends staging results:
-
-```yaml
-staging:
-  status: pass | fail
-  environment: <staging URL>
-  tests_run: <count>
-  tests_passed: <count>
-  tests_failed: <count>
-  otel_validated: true | false
-  dashboards_validated: true | false
-  tested_at: <YYYY-MM-DD>
-```
+For implementation task tracking, review tracking, and staging tracking schemas, see `.dev-workflow/references/workflow-schemas.md`.
 
 ## Preferences Protocol
 
@@ -160,13 +118,7 @@ Before starting ANY stage, check `.dev-workflow/preferences.yml`. If a preferenc
 ## Learnings Protocol
 
 Before starting ANY stage:
-1. Read `.dev-workflow/learnings/LEARNINGS.md`
+1. Read `.dev-workflow/learnings/LEARNINGS.md` (skip if file does not exist)
 2. Check for relevant entries from past sessions
-3. Apply relevant learnings proactively (e.g., "last time we forgot to add error handling for the X edge case")
+3. Apply relevant learnings proactively
 4. After completing the stage, note any new learnings
-
-## Feature Naming Convention
-
-Feature names use kebab-case: `user-authentication`, `payment-processing`, `search-api`.
-
-All documents for a feature share the same name: `docs/requirements/user-authentication.md`, `docs/hld/user-authentication.md`, `docs/lld/user-authentication.md`.

@@ -85,9 +85,7 @@ This project uses a structured, gated development workflow. Read `.claude/rules/
 /requirement → /hld → /lld → /implement → /review → /staging → /docs → /retro
 ```
 
-The pipeline is **configurable** via `workflow.pipeline` in `.dev-workflow/preferences.yml`. Mandatory stages (`requirement`, `lld`, `implement`, `review`) cannot be skipped. Individual features can override via `pipeline_overrides` in their requirement document.
-
-Each stage is gated — do not proceed until the prior stage's document has `status: approved|complete`, `completion.percentage: 100`, and `completion.blockers: []`. When a stage is skipped, gate on the nearest enabled predecessor.
+Each stage is gated — do not proceed until the prior stage's document has `status: approved|complete`, `completion.percentage: 100`, and `completion.blockers: []`.
 
 ### Tech Debt
 
@@ -96,14 +94,14 @@ Read `.dev-workflow/tech-debt.yml` before editing code. Fix broken windows in fi
 ### Rules
 
 Load on a need-to-know basis:
-- `.claude/rules/workflow.md` — Pipeline stages, gating logic, pipeline config
-- `.claude/rules/tdd.md` — Pointer to TDD reference (full: `.dev-workflow/references/tdd.md`)
-- `.claude/rules/code-quality.md` — Pointer to code quality reference (full: `.dev-workflow/references/code-quality.md`)
-- `.claude/rules/observability.md` — Pointer to observability reference (full: `.dev-workflow/references/observability.md`)
-- `.claude/rules/documentation.md` — Pointer to docs reference (full: `.dev-workflow/references/documentation.md`)
+- `.claude/rules/workflow.md` — Pipeline stages, gating logic
+- `.claude/rules/tdd.md` — TDD methodology
+- `.claude/rules/code-quality.md` — 5 core review dimensions
+- `.claude/rules/observability.md` — OTel, structured logging, metrics
+- `.claude/rules/documentation.md` — Doc standards
 - `.claude/rules/tech-debt.md` — Broken windows policy
-- `.claude/rules/review-dimensions.md` — Pointer to review-dimensions reference
-- `.claude/rules/recommended-tools.md` — Pointer to tools reference
+- `.claude/rules/review-dimensions.md` — Full 20-dimension reference (on demand)
+- `.claude/rules/recommended-tools.md` — MCP servers and tools
 
 ### Commands
 

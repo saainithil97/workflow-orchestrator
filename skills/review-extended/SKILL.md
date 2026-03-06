@@ -12,13 +12,20 @@ You are performing a comprehensive review of feature: **$ARGUMENTS**
 
 ## Before You Start
 
-Follow `@rules/preamble.md`, then read `@rules/review-dimensions.md` for the full 20-dimension definitions.
+Follow `@rules/preamble.md`.
+
+Load the full review references:
+- `.dev-workflow/references/code-quality.md` — 5 core dimensions
+- `.dev-workflow/references/review-dimensions.md` — all 20 dimensions
 
 ## Gate Check
 
-Same as `/review` — all LLD tasks must be `status: complete` and `tests_passing: true`.
+Follow the gate check protocol from `@rules/workflow.md` for this stage.
 
-Read `docs/lld/$ARGUMENTS.md` and verify this. If not met, refuse and suggest `/implement $ARGUMENTS`.
+Read `docs/lld/$ARGUMENTS.md` and verify:
+- ALL tasks have `status: complete` and `tests_passing: true`
+
+If not met: refuse and suggest `/implement $ARGUMENTS`.
 
 ## Process
 
@@ -42,7 +49,7 @@ Analyze the changed files to determine which Tier 2 dimensions apply:
 
 ### Step 3: Review Tier 2 Dimensions
 
-For each applicable dimension, review against the criteria in `.claude/rules/review-dimensions.md`.
+For each applicable dimension, review against the criteria in `.dev-workflow/references/review-dimensions.md`.
 
 ### Step 4: Review All Tier 3 Dimensions
 
@@ -60,38 +67,7 @@ Review against ALL Tier 3 dimensions regardless of file types:
 
 Same format as standard review, but with additional sections for each dimension checked.
 
-Update the LLD frontmatter with all dimensions checked:
-
-```yaml
-review:
-  status: pass | pass-with-warnings | fail
-  critical_issues: <count>
-  warnings: <count>
-  suggestions: <count>
-  reviewed_by: reviewer-agent
-  reviewed_at: <YYYY-MM-DD>
-  type: extended
-  dimensions_checked:
-    # Tier 1
-    - correctness
-    - security
-    - error-handling
-    - readability
-    - performance
-    # Tier 2 (applicable)
-    - api-design
-    - observability
-    - data-integrity
-    # Tier 3
-    - dependency-hygiene
-    - idiomatic-code
-    - configuration
-    - backward-compatibility
-    - resource-management
-    - testing-quality
-    - documentation-quality
-    - compliance
-```
+Update the LLD frontmatter using the review tracking schema from `.dev-workflow/references/workflow-schemas.md`, adding `type: extended` and listing all dimensions checked.
 
 ## Output
 

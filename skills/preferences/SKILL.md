@@ -1,13 +1,13 @@
 ---
 name: preferences
-description: View, update, or initialize developer and team preferences. Covers language, framework, testing, logging, OTel, dashboards, review dimensions, and workflow settings. Use at any time to configure the workflow.
+description: View, update, or initialize developer and team preferences. Covers language, framework, testing, logging, OTel, dashboards, review dimensions, pipeline config, model routing, and parallelism. Use at any time to configure the workflow.
 ---
 
 # Developer Preferences
 
 ## Purpose
 
-Manage the team and personal preferences that control how the development workflow operates. Preferences determine which tools, libraries, conventions, and platforms are used.
+Manage the team and personal preferences that control how the development workflow operates. Preferences determine which tools, libraries, conventions, platforms, models, and pipeline stages are used.
 
 ## Process
 
@@ -28,11 +28,13 @@ Display the current preferences in a readable format, organized by category.
 
 ### Step 3B: Update Preferences
 
-Ask which preference to change. Show the current value and ask for the new value. Provide a recommendation if applicable. Save the change.
+Ask which preference to change. Show the current value and ask for the new value. Provide a recommendation if applicable.
+
+**If the changed preference is in `workflow.models`**, run the Agent File Sync (Step 5) after saving.
 
 ### Step 3C: Initialize Preferences (Guided Walkthrough)
 
-Walk through each category, providing recommendations based on the codebase analysis.
+Walk through each category in order, providing recommendations based on codebase analysis.
 
 #### Project Basics
 | Preference | Description | Recommendation Logic |
@@ -86,7 +88,54 @@ Walk through each category, providing recommendations based on the codebase anal
 |-----------|-------------|---------------|
 | `branching_strategy` | Git branching model | trunk-based (recommended), gitflow, github-flow |
 | `commit_convention` | Commit message format | conventional-commits (recommended) |
-| `review_dimensions` | Enabled Tier 2/3 review dimensions | See review-dimensions.md |
+| `review_dimensions` | Enabled Tier 2/3 review dimensions | See `.dev-workflow/references/review-dimensions.md` |
+
+#### Pipeline Configuration
+| Preference | Description | Recommendation |
+|-----------|-------------|---------------|
+| `pipeline.preset` | Base stage set | `standard` (recommended): requirement→hld→lld→implement→review→docs→retro |
+| `pipeline.hld` | Include HLD stage | `true` for complex features, `false` for small bugfixes |
+| `pipeline.observe` | Include dedicated /observe step | `true` for full preset; otherwise inline during implement |
+| `pipeline.staging` | Include staging validation | `true` if a staging URL is available |
+| `pipeline.docs` | Include documentation sync | `true` (recommended for most teams) |
+| `pipeline.retro` | Include retrospective | `true` (recommended — drives learning) |
+| `pipeline.parallel_groups` | Stages to run concurrently | See below |
+| `max_learnings` | Max LEARNINGS.md entries before archival | 20 (recommended) |
+
+**Pipeline preset options:**
+- `minimal`: requirement, lld, implement, review — fastest, no design docs or docs sync
+- `standard` (default): adds hld, docs, retro — good for most teams
+- `full`: adds observe, staging — best for production services with staging environments
+
+Ask the developer which preset fits their workflow, then ask if any per-stage overrides are needed.
+
+If the developer mentions they have no staging environment, set `pipeline.staging: false`.
+If the developer says they skip HLD for small features, recommend using `pipeline_overrides` in individual requirement docs rather than disabling HLD project-wide.
+
+**Parallel groups** let pipeline stages run concurrently when their gates are satisfied. Ask:
+> "Would you like to run any stages in parallel? For example, observe + staging can run concurrently (both gate on review passing), and docs + retro can run concurrently (both gate on review/staging passing). This can significantly reduce total pipeline time."
+
+Safe built-in combinations to suggest:
+- `[observe, staging]` — post-review; no file conflicts
+- `[docs, retro]` — post-validation; docs writes doc files, retro writes learnings
+
+#### Model Routing
+| Preference | Description | Recommendation |
+|-----------|-------------|---------------|
+| `workflow.models.architect` | Model for HLD/LLD/requirement | `opus` — complex design reasoning |
+| `workflow.models.implementer` | Model for TDD code generation | `sonnet` — cost-effective, fast |
+| `workflow.models.reviewer` | Model for code review | `opus` — thorough security + correctness |
+| `workflow.models.documenter` | Model for documentation sync | `sonnet` — simpler reasoning task |
+| `workflow.models.default` | Fallback for unassigned roles | `sonnet` |
+
+Ask the developer: "Would you like to assign different models to different agent roles? Using opus for architect and reviewer gives deeper reasoning for design and security analysis, while sonnet for implementer and documenter is more cost-effective."
+
+Supported model values (common):
+- `opus` or `anthropic/claude-opus-4` — highest reasoning, highest cost
+- `sonnet` or `anthropic/claude-sonnet-4-5` — balanced (current default for all agents)
+- `haiku` or `anthropic/claude-haiku-3-5` — fastest, lowest cost, for simple tasks
+
+**After saving model preferences, run Agent File Sync (Step 5).**
 
 #### Staging & Deployment
 | Preference | Description | Ask developer |
@@ -106,6 +155,66 @@ For each preference, include a comment with the recommendation if the developer 
 ```yaml
 # Recommended: vitest (faster, native ESM support)
 test_framework: jest  # Developer preference
+```
+
+### Step 5: Agent File Sync (run when `workflow.models` changes)
+
+When any `workflow.models.*` value is set or changed, automatically sync the model to the corresponding agent definition files. Show the developer a diff of what will change and confirm before writing.
+
+#### Claude Code agents (`agents/*.md`):
+
+The `model:` field in each agent's YAML frontmatter controls which model Claude Code uses when that agent handles a skill.
+
+Read each agent file and update the `model:` field:
+
+| `workflow.models` key | Agent file |
+|-----------------------|-----------|
+| `architect` | `agents/architect.md` |
+| `implementer` | `agents/implementer.md` |
+| `reviewer` | `agents/reviewer.md` |
+| `documenter` | `agents/documenter.md` |
+
+Example: if `workflow.models.architect: opus`, update `agents/architect.md`:
+```yaml
+# Before:
+model: sonnet
+
+# After:
+model: opus
+```
+
+#### OpenCode agents (`.opencode/agents/*.md`):
+
+The OpenCode agent format also supports a `model:` field in the YAML frontmatter. Apply the same mapping:
+
+| `workflow.models` key | OpenCode agent file |
+|-----------------------|---------------------|
+| `architect` | `.opencode/agents/architect.md` |
+| `implementer` | `.opencode/agents/implementer.md` |
+| `reviewer` | `.opencode/agents/reviewer.md` |
+| `documenter` | `.opencode/agents/documenter.md` |
+
+**Note**: If the OpenCode platform version in use does not support the `model:` field (it will be silently ignored if unsupported), document this in a comment above the field:
+```yaml
+# model: controls which LLM this agent uses. Supported in OpenCode ≥ 1.x.
+model: opus
+```
+
+#### Scaffold copies (if present):
+
+If `scaffold/.opencode/agents/` exists, apply the same model updates there so new project scaffolds inherit the correct models.
+
+#### Confirmation:
+
+After syncing, report:
+```
+Agent model sync complete:
+  agents/architect.md       model: sonnet → opus
+  agents/reviewer.md        model: sonnet → opus
+  agents/implementer.md     model: sonnet  (unchanged)
+  agents/documenter.md      model: sonnet  (unchanged)
+  .opencode/agents/architect.md   model: sonnet → opus
+  .opencode/agents/reviewer.md    model: sonnet → opus
 ```
 
 ## Preference File Format
@@ -156,6 +265,18 @@ workflow:
     api-design: true
     observability: true
     data-integrity: true
+  pipeline:
+    preset: full
+    parallel_groups:
+      - [observe, staging]   # run concurrently after review passes
+      - [docs, retro]        # run concurrently after staging passes
+  models:
+    architect: opus
+    implementer: sonnet
+    reviewer: opus
+    documenter: sonnet
+    default: sonnet
+  max_learnings: 20
 
 staging:
   url: https://staging.example.com
@@ -167,4 +288,4 @@ staging:
 
 ## Output
 
-Updated `.dev-workflow/preferences.yml`.
+Updated `.dev-workflow/preferences.yml` and synced `agents/*.md` / `.opencode/agents/*.md` if model preferences changed.

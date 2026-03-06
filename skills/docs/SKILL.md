@@ -12,15 +12,28 @@ You are updating documentation for feature: **$ARGUMENTS**
 
 ## Before You Start
 
-Follow `@rules/preamble.md` (note especially: api_doc_format, dashboard_platform in preferences), then read `@rules/documentation.md` for the full standards.
+Follow `@rules/preamble.md` (note especially: api_doc_format, dashboard_platform in preferences).
+
+Load the full documentation reference: `.dev-workflow/references/documentation.md`
+
+## Pipeline Skip Check
+
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md`.
+
+If `docs` is **disabled** in the effective pipeline:
+- Print: "Docs stage is disabled in pipeline configuration. Skipping."
+- Exit.
 
 ## Gate Check
+
+Follow the gate check protocol from `@rules/workflow.md` for this stage.
 
 Read `docs/lld/$ARGUMENTS.md` and verify:
 - `review.status` is `pass` or `pass-with-warnings`
 - `review.critical_issues` is `0`
 
-If staging was run, also verify `staging.status` is `pass`.
+If staging ran (check if `staging` key exists in the LLD frontmatter), also verify:
+- `staging.status` is `pass`
 
 If not met: refuse to proceed and suggest the appropriate prior step.
 

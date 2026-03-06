@@ -41,21 +41,19 @@ Read `@rules/preamble.md`. This includes:
 /requirement → /hld → /lld → /implement → /review → /staging → /docs → /retro
 ```
 
-The pipeline is **configurable** via `workflow.pipeline` in `.dev-workflow/preferences.yml`. Mandatory stages (`requirement`, `lld`, `implement`, `review`) cannot be skipped. Individual features can override via `pipeline_overrides` in their requirement document.
-
-Each stage is gated — do not proceed until the prior stage's document has `status: approved|complete`, `completion.percentage: 100`, and `completion.blockers: []`. When a stage is skipped, gate on the nearest enabled predecessor.
+Each stage is gated — do not proceed until the prior stage's document has `status: approved|complete`, `completion.percentage: 100`, and `completion.blockers: []`.
 
 ## Rules
 
 Load on a need-to-know basis:
-- @rules/workflow.md — Pipeline stages, gating logic, completion markers, pipeline config
-- @rules/tdd.md — Pointer to TDD reference (full content in `.dev-workflow/references/tdd.md`)
-- @rules/code-quality.md — Pointer to code quality reference (full content in `.dev-workflow/references/code-quality.md`)
-- @rules/observability.md — Pointer to observability reference (full content in `.dev-workflow/references/observability.md`)
-- @rules/documentation.md — Pointer to docs reference (full content in `.dev-workflow/references/documentation.md`)
+- @rules/workflow.md — Pipeline stages, gating logic, completion markers
+- @rules/tdd.md — TDD methodology
+- @rules/code-quality.md — 5 core review dimensions
+- @rules/observability.md — OTel, structured logging, metrics, dashboards
+- @rules/documentation.md — Doc standards, sync rules
 - @rules/tech-debt.md — Broken windows policy for tech debt
-- @rules/review-dimensions.md — Pointer to review-dimensions reference
-- @rules/recommended-tools.md — Pointer to tools reference
+- @rules/review-dimensions.md — Full 20-dimension reference (on demand)
+- @rules/recommended-tools.md — MCP servers and tools per workflow stage
 
 ## Tech Debt
 
@@ -63,7 +61,7 @@ This project tracks tech debt in `.dev-workflow/tech-debt.yml`. When editing fil
 
 ## Documentation
 
-All documents in `docs/` (requirements, hld, lld, adr, runbooks, migrations, dashboards, observability). Templates in `.dev-workflow/templates/`. References in `.dev-workflow/references/`.
+All documents in `docs/` (requirements, hld, lld, adr, runbooks, migrations, dashboards, observability). Templates in `.dev-workflow/templates/`.
 
 ## Commands
 

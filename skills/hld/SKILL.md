@@ -14,7 +14,17 @@ You are creating an HLD for feature: **$ARGUMENTS**
 
 Follow `@rules/preamble.md`.
 
+## Pipeline Skip Check
+
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md` (preset + per-stage overrides + per-feature overrides from `docs/requirements/$ARGUMENTS.md` if it exists).
+
+If `hld` is **disabled** in the effective pipeline:
+- Print: "HLD stage is disabled in pipeline configuration (preset: <preset>). Skipping."
+- Exit. The `/lld` stage will gate on the requirement doc instead.
+
 ## Gate Check
+
+Follow the gate check protocol from `@rules/workflow.md` for this stage.
 
 Read `docs/requirements/$ARGUMENTS.md` and verify:
 - `status` is `approved` or `complete`

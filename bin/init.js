@@ -133,8 +133,14 @@ function main() {
   const command = args[0];
   const force = args.includes('--force');
 
+  if (command === 'update') {
+    // Delegate to update.js
+    require('./update.js');
+    return;
+  }
+
   if (command !== 'init') {
-    console.log('Usage: npx @dev-workflow/kit init [--force]');
+    console.log('Usage: npx @dev-workflow/kit <command> [flags]');
     console.log('');
     console.log('Commands:');
     console.log('  init     Scaffold dev-workflow files into your project');
@@ -142,6 +148,7 @@ function main() {
     console.log('');
     console.log('Flags:');
     console.log('  --force  Overwrite existing files (except preserved ones)');
+    console.log('  --dry-run  Preview changes without applying them (update only)');
     process.exit(command === undefined ? 1 : 0);
   }
 

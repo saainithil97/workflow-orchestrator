@@ -16,12 +16,18 @@ Follow `@rules/preamble.md`.
 
 ## Gate Check
 
-Read `docs/hld/$ARGUMENTS.md` and verify:
+Follow the gate check protocol from `@rules/workflow.md` for this stage.
+
+First, read the effective pipeline from `.dev-workflow/preferences.yml`. If `hld` is disabled, gate on `docs/requirements/$ARGUMENTS.md` instead of the HLD.
+
+**If HLD is enabled** — read `docs/hld/$ARGUMENTS.md` and verify:
 - `status` is `approved` or `complete`
 - `completion.percentage` is `100`
 - `completion.blockers` is empty
 
-If ANY condition fails: print what is missing, refuse to proceed, and suggest running `/hld $ARGUMENTS` first.
+**If HLD is disabled** — read `docs/requirements/$ARGUMENTS.md` and apply the same checks.
+
+If ANY condition fails: print what is missing, refuse to proceed, and suggest running the appropriate prior stage first.
 
 ## Process
 
@@ -29,11 +35,11 @@ If ANY condition fails: print what is missing, refuse to proceed, and suggest ru
 
 Read and internalize:
 - `docs/requirements/$ARGUMENTS.md` — the what and why
-- `docs/hld/$ARGUMENTS.md` — the how at a high level
+- `docs/hld/$ARGUMENTS.md` — the how at a high level (if it exists)
 
 ### Step 2: Explore Implementation Surface
 
-For each component identified in the HLD:
+For each component identified in the HLD (or requirement if HLD was skipped):
 - Find the relevant source files
 - Understand the existing code structure, patterns, and conventions
 - Identify where new code will be added
@@ -65,6 +71,14 @@ Decompose the implementation into atomic tasks. Each task MUST be:
 - **Ordered**: Dependencies are respected (task N depends only on tasks < N)
 - **Complete**: Includes both the implementation code AND its test(s)
 
+**Parallel safety — file conflict annotation:**
+
+The implementer will group tasks with the same dependency depth into parallel execution waves. Tasks in the same wave run concurrently. If two tasks at the same dependency level **write to the same file**, they cannot safely run in parallel.
+
+For each task, specify a `files` list that is accurate and complete. If a task at the same level as another task writes to the same file, explicitly add a `depends_on` reference to create a sequential ordering between them. This forces them into different waves and prevents write conflicts.
+
+> Rule: Two tasks that both write (not just read) the same file path MUST NOT be in the same wave. Use `depends_on` to enforce sequencing between them.
+
 For EACH task, specify:
 
 ```markdown
@@ -81,18 +95,7 @@ For EACH task, specify:
   - Edge cases to handle
 ```
 
-Also include each task in the frontmatter:
-
-```yaml
-tasks:
-  - id: N
-    description: "<description>"
-    files: ["<paths>"]
-    depends_on: []
-    status: pending
-    tests_passing: false
-    reviewed: false
-```
+Also include each task in the frontmatter using the task tracking schema from `.dev-workflow/references/workflow-schemas.md`.
 
 ### Step 6: Define Test Strategy
 

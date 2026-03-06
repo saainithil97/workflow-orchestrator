@@ -14,7 +14,13 @@ You are reviewing feature: **$ARGUMENTS**
 
 Follow `@rules/preamble.md` (check preferences for enabled Tier 2 dimensions, and learnings for recurring review findings).
 
+Load the full code quality reference: `.dev-workflow/references/code-quality.md`
+
+If any Tier 2 or Tier 3 dimensions are enabled in preferences (`workflow.review_dimensions`), also load: `.dev-workflow/references/review-dimensions.md`
+
 ## Gate Check
+
+Follow the gate check protocol from `@rules/workflow.md` for this stage.
 
 Read `docs/lld/$ARGUMENTS.md` and verify:
 - ALL tasks have `status: complete` and `tests_passing: true`
@@ -26,7 +32,7 @@ If ANY task is incomplete: print which tasks remain, refuse to proceed, and sugg
 ### Step 1: Understand the Change
 
 1. Read `docs/requirements/$ARGUMENTS.md` — what was supposed to be built
-2. Read `docs/hld/$ARGUMENTS.md` — how it was supposed to be built
+2. Read `docs/hld/$ARGUMENTS.md` if it exists — how it was supposed to be built
 3. Read `docs/lld/$ARGUMENTS.md` — the detailed plan and task list
 4. Identify all files that were created or modified during implementation
 
@@ -43,45 +49,7 @@ If any automated check fails critically (tests fail, type errors), stop the revi
 
 ### Step 3: Manual Review — 5 Core Dimensions
 
-Review EVERY changed file against these dimensions. Be specific — reference file:line for every finding.
-
-#### Dimension 1: Correctness
-- Does the code implement what the LLD specified?
-- Are there logic errors, off-by-one, wrong operators?
-- Are null/undefined values handled at every nullable point?
-- Are boundary conditions covered (empty, zero, max, min)?
-- Are race conditions possible with shared state?
-- Do the tests actually verify the behavior (not just exercise the code)?
-
-#### Dimension 2: Security
-- Is ALL external input validated at the system boundary?
-- Are queries parameterized (SQL injection)?
-- Is output escaped (XSS)?
-- Are auth checks present on every endpoint?
-- Are secrets hardcoded anywhere?
-- Do error responses leak internal details (stack traces, DB schema)?
-- Are dependencies free of known vulnerabilities?
-
-#### Dimension 3: Error Handling
-- Does every `catch`/`except` block handle the error meaningfully?
-- Are errors typed and distinguishable programmatically?
-- Are error messages descriptive with context?
-- Are resources cleaned up in error paths (finally/defer/using)?
-- Is retry logic present for transient failures?
-
-#### Dimension 4: Readability & Maintainability
-- Can each function be understood within 30 seconds?
-- Are names descriptive and consistent with the codebase?
-- Is cognitive complexity low (no deep nesting)?
-- Is dead code removed?
-- Does the code follow existing codebase conventions?
-
-#### Dimension 5: Performance
-- Are there N+1 query patterns?
-- Are there accidental O(n^2) algorithms?
-- Are collections and caches bounded?
-- Are expensive operations cached or batched?
-- Are database queries using appropriate indexes?
+Review EVERY changed file against the 5 dimensions defined in `.dev-workflow/references/code-quality.md`. Be specific — reference file:line for every finding.
 
 ### Step 4: Check Observability
 
@@ -148,23 +116,7 @@ Append to `docs/lld/$ARGUMENTS.md` under `## Review Notes`:
 - Dashboards: <complete | missing for X>
 ```
 
-Update the LLD frontmatter:
-
-```yaml
-review:
-  status: pass | pass-with-warnings | fail
-  critical_issues: <count>
-  warnings: <count>
-  suggestions: <count>
-  reviewed_by: reviewer-agent
-  reviewed_at: <YYYY-MM-DD>
-  dimensions_checked:
-    - correctness
-    - security
-    - error-handling
-    - readability
-    - performance
-```
+Update the LLD frontmatter using the review tracking schema from `.dev-workflow/references/workflow-schemas.md`.
 
 ### Step 8: Determine Outcome
 

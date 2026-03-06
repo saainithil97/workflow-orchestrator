@@ -1,163 +1,200 @@
 ---
 name: workflow
-description: Run the full development pipeline end-to-end for a feature — requirement gathering, HLD, LLD, TDD implementation, code review, staging validation, documentation sync, and retrospective. Pauses for user approval at key stages.
+description: Run the full development pipeline end-to-end for a feature — requirement gathering, HLD, LLD, TDD implementation, code review, staging validation, documentation sync, and retrospective. Pauses for user approval at key stages. Supports parallel stage groups and model routing from preferences.
 argument-hint: "[feature-name]"
-disable-model-invocation: true
+context: fork
 ---
 
 # Full Development Workflow
 
 You are running the complete development pipeline for feature: **$ARGUMENTS**
 
-## Overview
-
-This command orchestrates all 8 stages of the development workflow sequentially. It pauses for developer approval at key decision points.
-
-```
-/requirement → /hld → /lld → /implement → /review → /staging → /docs → /retro
-```
-
 ## Before You Start
 
 Follow `@rules/preamble.md` — if preferences are empty, run `/preferences` first.
 
-## Pipeline Execution
+## Context Management
 
-### Stage 1: Requirement Gathering
+**Critical**: this orchestrator's context window must stay lean. After each stage completes:
+- Do NOT retain the stage's full output in context.
+- Read only the **frontmatter** of the stage's output document to verify gate conditions.
+- Carry forward only a one-line status entry per stage: `Stage | status | document path | key metric`.
+- The design documents on disk are the source of truth — trust them, not your context.
 
-Execute the `/requirement $ARGUMENTS` skill.
+## Step 0: Resolve Effective Pipeline
 
-**Pause point**: Present the requirement document to the developer. Ask:
-- Is this accurate and complete?
-- Do you approve this requirement?
+1. Read `.dev-workflow/preferences.yml`.
+2. Resolve preset + per-stage overrides + `parallel_groups` using `@rules/workflow.md`.
+3. Check `docs/requirements/$ARGUMENTS.md` for `pipeline_overrides` if the file exists.
+4. Mandatory stages (requirement, lld, implement, review) are always enabled.
 
-Only proceed when the developer approves. The requirement document must have `status: approved`.
+**Print the effective pipeline before starting**, including which stages are parallel:
 
----
+```
+Effective pipeline for '$ARGUMENTS':
+  [1] requirement        (mandatory)
+  [2] hld                (optional — enabled)
+  [3] lld                (mandatory)
+  [4] implement          (mandatory — wave-parallel internally)
+  [5] review             (mandatory)
+  [6] observe + staging  (parallel group — both enabled)
+  [7] docs + retro       (parallel group — both enabled)
+```
 
-### Stage 2: High-Level Design
+Ask the developer to confirm or adjust before proceeding.
 
-Execute the `/hld $ARGUMENTS` skill.
+## Execution
 
-**Pause point**: Present the HLD to the developer. Ask:
-- Does this architecture make sense?
-- Are the technology decisions acceptable?
-- Do you approve this HLD?
+Run each stage (or parallel group) in the resolved order. After each stage, **record only**:
 
-Only proceed when the developer approves. The HLD must have `status: approved`.
+```
+✓ <stage>  |  <status>  |  <document path>  |  <key metric>
+```
 
----
+Example: `✓ review  |  pass-with-warnings  |  docs/lld/feature.md  |  0 critical, 2 warnings`
 
-### Stage 3: Low-Level Design
-
-Execute the `/lld $ARGUMENTS` skill.
-
-**Pause point**: Present the LLD to the developer. Ask:
-- Does the task breakdown look right?
-- Is the test strategy sufficient?
-- Do you approve this LLD?
-
-Only proceed when the developer approves. The LLD must have `status: approved`.
-
----
-
-### Stage 4: Implementation
-
-Execute the `/implement $ARGUMENTS` skill.
-
-This stage does NOT pause for approval between tasks — it runs all tasks in sequence following TDD. However, if a task fails or gets blocked, it stops and reports.
-
-**Completion check**: All tasks must have `status: complete` and `tests_passing: true`.
+Discard the rest of the stage output from context.
 
 ---
 
-### Stage 5: Code Review
+### Stage: Requirement [MANDATORY]
 
-Execute the `/review $ARGUMENTS` skill.
+Execute `/requirement $ARGUMENTS`.
 
-**Pause point if review fails**: If critical issues are found:
-1. Present the findings to the developer
-2. Ask if they want to fix the issues and re-review, or override
-3. If fix: go back to Stage 4 to address critical issues, then re-run Stage 5
-4. If override: proceed with warnings logged
+**Pause**: Present the requirement summary to the developer. Ask for approval.
+Gate: `docs/requirements/$ARGUMENTS.md` → `status: approved`
 
-**Completion check**: `review.status` must be `pass` or `pass-with-warnings` with `critical_issues: 0`.
+Record: `✓ requirement | approved | docs/requirements/$ARGUMENTS.md`
 
 ---
 
-### Stage 6: Staging Validation
+### Stage: HLD [optional]
 
-Execute the `/staging $ARGUMENTS` skill.
+*Skip if disabled. If skipped, record: `✗ hld | skipped`.*
 
-**Skip condition**: If `staging_url` is not in preferences and the developer indicates no staging environment is available, skip this stage with a note.
+Execute `/hld $ARGUMENTS`.
 
-**Pause point if staging fails**: Present failures and ask the developer for direction:
-- Fix code issues and re-run from the appropriate stage
-- Fix environment issues manually and re-run staging
-- Skip staging validation with a documented justification
+**Pause**: Present the HLD summary. Ask for approval.
+Gate: `docs/hld/$ARGUMENTS.md` → `status: approved`
 
----
-
-### Stage 7: Documentation
-
-Execute the `/docs $ARGUMENTS` skill.
-
-This stage does not typically require a pause — it updates documentation based on the implementation.
-
-**Completion check**: All documentation checklist items verified.
+Record: `✓ hld | approved | docs/hld/$ARGUMENTS.md`
 
 ---
 
-### Stage 8: Retrospective
+### Stage: LLD [MANDATORY]
 
-Execute the `/retro $ARGUMENTS` skill.
+Execute `/lld $ARGUMENTS`.
 
-This is always the final stage. It captures learnings and developer feedback for future sessions.
+**Pause**: Present the LLD task list and dependency graph. Ask for approval.
+Gate: `docs/lld/$ARGUMENTS.md` → `status: approved`
+
+Record: `✓ lld | approved | docs/lld/$ARGUMENTS.md | N tasks`
+
+---
+
+### Stage: Implementation [MANDATORY]
+
+Execute `/implement $ARGUMENTS`.
+
+The implementer computes execution waves from the task dependency graph and runs independent tasks in parallel. No per-task pauses — the implementer reports after all waves complete.
+
+If a wave fails, the implementer reports the blocking task. Ask the developer how to proceed.
+
+Gate: All tasks `status: complete` AND `tests_passing: true`.
+
+Record: `✓ implement | complete | docs/lld/$ARGUMENTS.md | N tasks, M tests`
+
+---
+
+### Stage: Review [MANDATORY]
+
+Execute `/review $ARGUMENTS`.
+
+**Pause if review fails** (critical issues found):
+1. Present the critical issues summary
+2. Ask: fix and re-review, or override with documented justification?
+3. If fix: re-run `/implement $ARGUMENTS` for the affected tasks, then re-run `/review $ARGUMENTS`
+4. If override: proceed with warning logged
+
+Gate: `review.status: pass | pass-with-warnings` AND `review.critical_issues: 0`
+
+Record: `✓ review | pass | docs/lld/$ARGUMENTS.md | N critical, N warnings`
+
+---
+
+### Stage Group: Post-Review [optional stages, potentially parallel]
+
+Check the effective pipeline for `parallel_groups` containing `observe` and/or `staging`.
+
+**If both observe and staging are enabled AND in the same parallel group:**
+
+Launch both concurrently using the Task tool:
+- Task A: Execute `/observe $ARGUMENTS`
+- Task B: Execute `/staging $ARGUMENTS`
+
+Wait for both to complete. If either fails:
+- Staging failure: present results, ask developer for direction (fix code → re-implement + re-review, fix env manually, or skip with justification)
+- Observe failure: treat as a warning; observability gaps are not a hard gate
+
+**If only one is enabled, or they are not in the same parallel group:** run sequentially.
+
+**If neither is enabled:** skip both, record `✗ observe | skipped` and `✗ staging | skipped`.
+
+Record each: `✓ observe | complete | ...` and `✓ staging | pass | docs/lld/$ARGUMENTS.md | X/Y tests`
+
+---
+
+### Stage Group: Post-Validation [optional stages, potentially parallel]
+
+Check the effective pipeline for `parallel_groups` containing `docs` and/or `retro`.
+
+**If both docs and retro are enabled AND in the same parallel group:**
+
+Launch both concurrently using the Task tool:
+- Task A: Execute `/docs $ARGUMENTS`
+- Task B: Execute `/retro $ARGUMENTS`
+
+Wait for both to complete.
+
+**If only one is enabled, or they are not in the same parallel group:** run sequentially.
+
+**If neither is enabled:** skip both.
+
+Record each: `✓ docs | complete | N files updated` and `✓ retro | complete | N learnings`
 
 ---
 
 ## Pipeline Summary Report
 
-After all stages complete, present a summary:
+After all stages complete, present a final summary using only the recorded status entries:
 
 ```markdown
 # Workflow Complete: $ARGUMENTS
 
-## Stages
+## Pipeline
 | Stage | Status | Notes |
 |-------|--------|-------|
-| Requirement | complete | docs/requirements/$ARGUMENTS.md |
-| HLD | complete | docs/hld/$ARGUMENTS.md |
-| LLD | complete | docs/lld/$ARGUMENTS.md |
-| Implementation | complete | N tasks, M tests |
-| Review | pass | N critical, N warnings, N suggestions |
-| Staging | pass | Integration: X/Y, E2E: X/Y |
-| Documentation | complete | N files updated |
-| Retrospective | complete | N learnings recorded |
-
-## Files Created/Modified
-- <list of all files>
+| requirement | complete | docs/requirements/$ARGUMENTS.md |
+| hld | complete / skipped | docs/hld/$ARGUMENTS.md |
+| lld | complete | docs/lld/$ARGUMENTS.md — N tasks |
+| implement | complete | N tasks, M tests |
+| review | pass | N critical, N warnings |
+| observe | complete / skipped | — |
+| staging | pass / skipped | X/Y tests |
+| docs | complete / skipped | N files |
+| retro | complete / skipped | N learnings |
 
 ## Ready to Commit
-All work is complete. You can now commit and push:
-```
 git add .
 git commit -m "feat($ARGUMENTS): <summary>"
 git push
 ```
-```
 
 ## Error Recovery
 
-If any stage fails:
-1. Stop the pipeline
-2. Report which stage failed and why
-3. Suggest the remediation steps
-4. The developer can fix the issue and re-run the specific stage using its individual command
-5. Once fixed, resume the pipeline from where it stopped (re-run the failed stage)
+If any stage fails irreversibly:
+1. Stop the pipeline. Report stage, reason, suggested fix.
+2. The developer fixes the issue and re-runs the specific stage command directly.
+3. Once fixed, re-invoke `/workflow $ARGUMENTS` — it reads completion markers from the design documents and resumes from the first incomplete stage.
 
-The pipeline does NOT start over from scratch — it respects the completion markers in the design documents.
-
-## Output
-
-A fully implemented, reviewed, tested, documented, and retrospected feature ready for git commit.
+The pipeline does NOT restart from scratch — completion markers in design documents are the checkpoint mechanism.

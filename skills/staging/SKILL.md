@@ -14,7 +14,19 @@ You are validating feature **$ARGUMENTS** against the staging environment.
 
 Follow `@rules/preamble.md` (note especially: staging_url, staging_deploy_command, integration_test_command, e2e_test_command, otel_endpoint, dashboard_platform in preferences — these are critical for this stage).
 
+Load the full observability reference: `.dev-workflow/references/observability.md`
+
+## Pipeline Skip Check
+
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md`.
+
+If `staging` is **disabled** in the effective pipeline:
+- Print: "Staging stage is disabled in pipeline configuration (preset: <preset>). Skipping."
+- Exit. The `/docs` stage will gate on review pass directly.
+
 ## Gate Check
+
+Follow the gate check protocol from `@rules/workflow.md` for this stage.
 
 Read `docs/lld/$ARGUMENTS.md` and verify:
 - `review.status` is `pass` or `pass-with-warnings`
@@ -113,33 +125,7 @@ If deployment is not automated, provide instructions and wait for the developer 
 
 ### Step 7: Report Results
 
-Update `docs/lld/$ARGUMENTS.md` frontmatter:
-
-```yaml
-staging:
-  status: pass | fail
-  environment: <staging_url>
-  deployed_at: <YYYY-MM-DD>
-  tests:
-    integration:
-      total: <N>
-      passed: <N>
-      failed: <N>
-    e2e:
-      total: <N>
-      passed: <N>
-      failed: <N>
-  observability:
-    traces: validated | not-validated | issues-found
-    logs: validated | not-validated | issues-found
-    metrics: validated | not-validated | issues-found
-    dashboards: validated | not-validated | issues-found
-  performance:
-    p50_ms: <value>
-    p95_ms: <value>
-    p99_ms: <value>
-  tested_at: <YYYY-MM-DD>
-```
+Update `docs/lld/$ARGUMENTS.md` frontmatter using the staging tracking schema from `.dev-workflow/references/workflow-schemas.md`.
 
 ### Step 8: Handle Failures
 

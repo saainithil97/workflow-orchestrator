@@ -12,7 +12,17 @@ You are setting up observability for feature: **$ARGUMENTS**
 
 ## Before You Start
 
-Follow `@rules/preamble.md` (note especially: otel_exporter, otel_endpoint, logging_library, dashboard_platform, metrics_format in preferences), then read `@rules/observability.md` for the full standards.
+Follow `@rules/preamble.md` (note especially: otel_exporter, otel_endpoint, logging_library, dashboard_platform, metrics_format in preferences).
+
+Load the full observability reference: `.dev-workflow/references/observability.md`
+
+## Pipeline Skip Check
+
+Read `.dev-workflow/preferences.yml`. Resolve the effective pipeline using the rules in `@rules/workflow.md`.
+
+If `observe` is **disabled** in the effective pipeline:
+- Print: "Observe stage is disabled in pipeline configuration. Skipping."
+- Exit. Observability instrumentation is expected to be handled inline during `/implement`.
 
 ## Process
 
@@ -49,7 +59,7 @@ For the feature's code paths:
    - Every cache operation
    - Every message queue publish/consume
    - Every significant business operation
-2. Add span attributes as specified in `.claude/rules/observability.md`
+2. Add span attributes as specified in `.dev-workflow/references/observability.md`
 3. Ensure trace context propagation across service boundaries
 4. Ensure span names follow the convention: `<component>.<operation>`
 
@@ -71,7 +81,7 @@ For the feature's code paths:
 
 For the feature's code paths:
 
-1. Add required metrics from `.claude/rules/observability.md`:
+1. Add required metrics from `.dev-workflow/references/observability.md`:
    - `http_requests_total` (counter) with method, route, status_code labels
    - `http_request_duration_seconds` (histogram) with method, route labels
    - `errors_total` (counter) with type, component labels
