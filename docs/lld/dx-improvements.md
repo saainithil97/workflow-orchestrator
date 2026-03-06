@@ -39,6 +39,20 @@ completion:
   percentage: 100
   blockers: []
 
+review:
+  status: pass-with-warnings
+  critical_issues: 0
+  warnings: 4
+  suggestions: 0
+  reviewed_by: reviewer-agent
+  reviewed_at: 2026-03-06
+  dimensions_checked:
+    - correctness
+    - security
+    - error-handling
+    - readability
+    - performance
+
 tasks:
   - id: 1
     description: "Fix OpenCode implementer agent — remove LLD update, return results to orchestrator"
@@ -649,3 +663,51 @@ Implemented 2026-03-06. All 14 tasks completed across 3 waves.
 - The `--opencode-only` check also correctly gates the `.claude/rules/` and `.claude/skills/` copy operations (which are done separately from the scaffold copy), not just the scaffold files.
 
 **Skills directory sync**: `/status` and `/reset` skill directories were created in both `skills/` and `.claude/skills/` as required. The `skills/` directory is the canonical source; `.claude/skills/` is the installed copy.
+
+---
+
+## Review Notes
+
+Reviewed 2026-03-06. Result: **pass-with-warnings** (4 warnings, 0 critical issues). All warnings fixed inline.
+
+### W1 — Duplicate step number in `review-extended.md` (readability)
+
+**File**: `.opencode/commands/review-extended.md`, `scaffold/.opencode/commands/review-extended.md`
+
+The Instructions section had two entries numbered `3.` The second `3.` (Load both reference files) was renumbered to `4.` in both files.
+
+**Fixed**: Yes.
+
+---
+
+### W2 — Misleading variable names in `bin/init.js` (readability)
+
+`CLAUDE_ONLY_PATHS` actually held Claude-specific paths to *exclude* when `--opencode-only` is active, and `OPENCODE_PATHS` held OpenCode-specific paths to exclude when `--claude-only` is active. The names implied the opposite of their role.
+
+**Fix**: Renamed to `CLAUDE_SPECIFIC_PATHS` and `OPENCODE_SPECIFIC_PATHS`, grouped under a `// ── Platform filter lists ──` comment.
+
+**Fixed**: Yes.
+
+---
+
+### W3 — Missing `complete` state for implement stage in `/status` skill (correctness)
+
+**Files**: `skills/status/SKILL.md`, `.claude/skills/status/SKILL.md`, `.opencode/commands/status.md`, `scaffold/.opencode/commands/status.md`
+
+The implement-stage status logic only handled `in-progress` (some tasks done) and `pending` (no tasks done). It was missing the `complete` case (all tasks done, `tests_passing: true`), which would have caused a completed implement stage to display as `in-progress`.
+
+**Fix**: Added `complete` branch — if all tasks have `status: complete` AND `tests_passing: true`, display as complete.
+
+**Fixed**: Yes.
+
+---
+
+### W4 — Contradictory test-suite rule in `implementer.md` agent (correctness)
+
+**Files**: `.opencode/agents/implementer.md`, `scaffold/.opencode/agents/implementer.md`
+
+Rule 5 stated "ALWAYS run full test suite after completing a task." This contradicts the forked-agent model where the implementer agent handles only its own task's tests and the orchestrator (`/implement`) runs the full suite between waves.
+
+**Fix**: Updated to "ALWAYS run this task's tests after completing it (NOT the full suite — the orchestrator runs that)."
+
+**Fixed**: Yes.

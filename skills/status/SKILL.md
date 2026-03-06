@@ -43,7 +43,7 @@ For each enabled stage in the effective pipeline, determine status:
 | requirement | `docs/requirements/$ARGUMENTS.md` | complete if `status: approved\|complete` |
 | hld | `docs/hld/$ARGUMENTS.md` | complete if `status: approved\|complete` |
 | lld | `docs/lld/$ARGUMENTS.md` | complete if `status: approved\|complete` |
-| implement | LLD frontmatter `tasks` | in-progress if any `complete`, pending if none; show X/Y tasks |
+| implement | LLD frontmatter `tasks` | complete if all tasks `complete`; in-progress if any `complete`; pending if none; show X/Y tasks |
 | review | LLD frontmatter `review` | complete if `review.status: pass\|pass-with-warnings` |
 | observe | LLD frontmatter `observability` | complete if `observability.status: complete` |
 | staging | LLD frontmatter `staging` | complete if `staging.status: pass` |

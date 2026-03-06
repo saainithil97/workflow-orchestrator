@@ -127,19 +127,21 @@ function printClaudeCodeInstructions() {
   console.log('');
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
+// ── Platform filter lists ─────────────────────────────────────────────────────
 
-// Directories/files to exclude when --claude-only flag is set (no OpenCode files)
-const OPENCODE_PATHS = [
+// Paths to exclude when --claude-only is set (these are OpenCode-specific files)
+const OPENCODE_SPECIFIC_PATHS = [
   '.opencode',
   'opencode.json',
 ];
 
-// Directories to exclude when --opencode-only flag is set (no Claude rules/skills)
-const CLAUDE_ONLY_PATHS = [
+// Paths to exclude when --opencode-only is set (these are Claude-specific files)
+const CLAUDE_SPECIFIC_PATHS = [
   '.claude/rules',
   '.claude/skills',
 ];
+
+// ── Main ─────────────────────────────────────────────────────────────────────
 
 function isExcluded(relativePath, excludedPaths) {
   return excludedPaths.some(p => relativePath === p || relativePath.startsWith(p + '/'));
@@ -223,11 +225,11 @@ function main() {
   // Build the list of paths to exclude based on platform flags
   const excludedPaths = [];
   if (claudeOnly) {
-    excludedPaths.push(...OPENCODE_PATHS);
+    excludedPaths.push(...OPENCODE_SPECIFIC_PATHS);
     console.log('[dev-workflow] Claude-only mode: skipping .opencode/ files');
   }
   if (opencodeOnly) {
-    excludedPaths.push(...CLAUDE_ONLY_PATHS);
+    excludedPaths.push(...CLAUDE_SPECIFIC_PATHS);
     console.log('[dev-workflow] OpenCode-only mode: skipping .claude/rules/ and .claude/skills/');
   }
 

@@ -27,7 +27,7 @@ Check each enabled stage:
 | requirement | `docs/requirements/$ARGUMENTS.md` | `status: approved\|complete` |
 | hld | `docs/hld/$ARGUMENTS.md` | `status: approved\|complete` |
 | lld | `docs/lld/$ARGUMENTS.md` | `status: approved\|complete` |
-| implement | LLD `tasks` frontmatter | all tasks `status: complete` |
+| implement | LLD `tasks` frontmatter | all tasks `status: complete`; in-progress if any complete; pending if none |
 | review | LLD `review` frontmatter | `review.status: pass\|pass-with-warnings` |
 | observe | LLD `observability` frontmatter | `observability.status: complete` |
 | staging | LLD `staging` frontmatter | `staging.status: pass` |

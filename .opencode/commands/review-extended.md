@@ -15,8 +15,8 @@ Same as standard review — all LLD tasks must be `status: complete` and `tests_
 1. Load `.dev-workflow/references/code-quality.md` for the 5 core review dimensions
 2. Load `.dev-workflow/references/review-dimensions.md` for full Tier 2/3 dimension definitions
 3. Execute all steps from the standard `/review` command (5 core dimensions)
-3. Determine applicable Tier 2 dimensions based on changed files
-4. Review ALL Tier 3 dimensions regardless of file types
+4. Determine applicable Tier 2 dimensions based on changed files
+5. Review ALL Tier 3 dimensions regardless of file types
 
 ## Tier 2 Dimensions (context-dependent)
 - API Design (new/modified endpoints)

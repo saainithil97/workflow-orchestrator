@@ -42,5 +42,5 @@ Do NOT update `docs/lld/` directly — the orchestrator (workflow or implement s
 - NEVER skip the Red phase
 - NEVER modify a test to make it pass (unless the test itself is wrong)
 - NEVER implement multiple tasks at once
-- ALWAYS run full test suite after completing a task
+- ALWAYS run this task's tests after completing it (NOT the full suite — the orchestrator runs that)
 - ALWAYS read preferences and learnings before starting
