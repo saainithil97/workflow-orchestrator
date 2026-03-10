@@ -10,6 +10,12 @@ Requirement → HLD → LLD → TDD Implementation → Review → Staging → Do
 
 Each stage is gated — the agent cannot proceed until the prior stage's document is approved, 100% complete, and has no blockers.
 
+For new domains, a pre-pipeline exploration flow builds understanding before committing to build:
+
+```
+Explore → Spike → Crystallize → Requirement → ...pipeline
+```
+
 ## Features
 
 - **Strict gating** with YAML frontmatter validation (status, completion percentage, blockers)
@@ -49,8 +55,8 @@ npx @dev-workflow/kit init
 This copies the project-local files into your project:
 - `.dev-workflow/` — templates, preferences, learnings, tools catalog
 - `.claude/rules/` — 9 shared rule files (workflow, TDD, code quality, tech debt, etc.)
-- `.claude/skills/` — 17 skill directories (OpenCode reads `.claude/skills/*/SKILL.md` natively)
-- `.opencode/commands/` — 17 command files mirroring Claude Code skills
+- `.claude/skills/` — 20 skill directories (OpenCode reads `.claude/skills/*/SKILL.md` natively)
+- `.opencode/commands/` — 20 command files mirroring Claude Code skills
 - `.opencode/agents/` — 4 agent files (architect, implementer, reviewer, documenter)
 - `docs/` — 8 documentation subdirectories
 - `opencode.json` — config referencing shared rules
@@ -99,7 +105,7 @@ After running init, your project will contain:
 your-project/
 ├── .claude/
 │   ├── rules/              # 9 rule files (pipeline, TDD, code quality, etc.)
-│   └── skills/             # 17 skill directories (one SKILL.md each)
+│   └── skills/             # 20 skill directories (one SKILL.md each)
 ├── .dev-workflow/
 │   ├── preferences.yml     # Team preferences (committed)
 │   ├── preferences.local.yml  # Personal overrides (gitignored)
@@ -110,7 +116,7 @@ your-project/
 │   └── templates/          # 10 document templates
 ├── .opencode/
 │   ├── agents/             # 4 agent definitions
-│   └── commands/           # 17 command files
+│   └── commands/           # 20 command files
 ├── docs/                   # 8 empty doc subdirectories with .gitkeep
 ├── opencode.json           # OpenCode config
 └── .gitignore              # Updated with dev-workflow entries
@@ -187,6 +193,9 @@ Additional commands:
 - `/dev-workflow:doctor` — scan codebase for tech debt, generate health report
 - `/dev-workflow:onboard` — analyze codebase, generate CLAUDE.md + AGENTS.md
 - `/dev-workflow:workflow` — run the full pipeline end-to-end
+- `/dev-workflow:explore <topic>` — explore a new topic (code-first, curiosity-driven, state tracked)
+- `/dev-workflow:spike <topic> <question>` — time-boxed spike (hypothesis, minimal code, decision)
+- `/dev-workflow:crystallize <topic>` — bridge exploration to building (synthesize into a requirement)
 
 ## Configuration
 
@@ -317,7 +326,7 @@ This is woven into the preamble (step 4), the implementer agent (refactor phase)
 your-project/
 ├── .claude/
 │   ├── rules/              # 9 rule files (workflow, TDD, code quality, tech debt, etc.)
-│   └── skills/             # 17 skills (requirement, HLD, LLD, implement, status, reset, doctor, onboard, etc.)
+│   └── skills/             # 20 skills (requirement, HLD, LLD, implement, explore, spike, crystallize, etc.)
 │       └── */SKILL.md      # OpenCode auto-discovers these as agent skills
 ├── .dev-workflow/
 │   ├── templates/          # Document templates (requirement, HLD, LLD, ADR, etc.)
@@ -329,7 +338,7 @@ your-project/
 │   └── learnings/
 │       └── LEARNINGS.md    # Session-to-session learning log
 ├── .opencode/              # (OpenCode users only)
-│   ├── commands/           # 17 command files
+│   ├── commands/           # 20 command files
 │   └── agents/             # 4 agent files
 ├── docs/
 │   ├── requirements/       # Requirement documents

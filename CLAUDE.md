@@ -2,6 +2,20 @@
 
 This plugin provides a structured, gated development workflow. Read `${CLAUDE_PLUGIN_ROOT}/rules/preamble.md` before starting any work.
 
+## Exploration → Build Flow
+
+When entering unfamiliar territory, use the pre-pipeline exploration flow before committing to build:
+
+```
+/dev-workflow:explore <topic> → /dev-workflow:spike <topic> <question> → /dev-workflow:crystallize <topic> → /dev-workflow:requirement ...
+```
+
+- **`/explore`** — Learn a topic with a sharp collaborator. Code-first, curiosity-driven. State tracked in `.learn/topics/<topic>/`.
+- **`/spike`** — Time-boxed investigation. Hypothesis → minimal code → decision. Answers questions, doesn't build features.
+- **`/crystallize`** — Bridge to building. Synthesizes exploration into a draft requirement, carrying decisions and constraints forward.
+
+These are NOT pipeline stages. No gates, no frontmatter schemas. Use them when you need to, skip them when you don't.
+
 ## Pipeline
 
 ```
@@ -53,3 +67,6 @@ All documents in `docs/` (requirements, hld, lld, adr, runbooks, migrations, das
 | `/dev-workflow:doctor` | Scan codebase for tech debt, generate health report |
 | `/dev-workflow:onboard` | Generate codebase-aware CLAUDE.md and AGENTS.md |
 | `/dev-workflow:workflow <name>` | Run the full pipeline end-to-end (respects pipeline config) |
+| `/dev-workflow:explore <topic>` | Explore a new topic — code-first, curiosity-driven, state tracked |
+| `/dev-workflow:spike <topic> <question>` | Time-boxed spike — hypothesis, minimal code, decision |
+| `/dev-workflow:crystallize <topic>` | Bridge exploration to building — synthesize into a requirement |

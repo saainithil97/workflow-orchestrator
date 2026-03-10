@@ -41,6 +41,8 @@ Read `@rules/preamble.md`. This includes:
 /requirement → /hld → /lld → /implement → /review → /staging → /docs → /retro
 ```
 
+For new domains, explore before building: `/explore` → `/spike` → `/crystallize` → `/requirement`
+
 Each stage is gated — do not proceed until the prior stage's document has `status: approved|complete`, `completion.percentage: 100`, and `completion.blockers: []`.
 
 ## Rules
@@ -84,3 +86,6 @@ All documents in `docs/` (requirements, hld, lld, adr, runbooks, migrations, das
 | `/preferences` | View or update developer/team preferences |
 | `/tools` | Browse and configure recommended MCP servers and dev tools |
 | `/workflow <name>` | Run the full pipeline end-to-end |
+| `/explore <topic>` | Explore a new topic — code-first, curiosity-driven |
+| `/spike <topic> <question>` | Time-boxed spike — hypothesis, minimal code, decision |
+| `/crystallize <topic>` | Bridge exploration to building — synthesize into a requirement |

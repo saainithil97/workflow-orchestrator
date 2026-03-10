@@ -29,3 +29,6 @@ CLAUDE.local.md
 .env
 .env.local
 .env.*.local
+
+# Learning artifacts (personal exploration state — not project docs)
+.learn/topics/

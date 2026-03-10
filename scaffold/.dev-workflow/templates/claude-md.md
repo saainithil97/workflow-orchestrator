@@ -85,6 +85,8 @@ This project uses a structured, gated development workflow. Read `.claude/rules/
 /requirement → /hld → /lld → /implement → /review → /staging → /docs → /retro
 ```
 
+For new domains, explore before building: `/explore` → `/spike` → `/crystallize` → `/requirement`
+
 Each stage is gated — do not proceed until the prior stage's document has `status: approved|complete`, `completion.percentage: 100`, and `completion.blockers: []`.
 
 ### Tech Debt
@@ -121,3 +123,6 @@ Load on a need-to-know basis:
 | `/onboard` | Regenerate this file with fresh analysis |
 | `/preferences` | View or update preferences |
 | `/tools` | Browse recommended MCP servers |
+| `/explore <topic>` | Explore a new topic — code-first, curiosity-driven |
+| `/spike <topic> <question>` | Time-boxed spike — hypothesis, minimal code, decision |
+| `/crystallize <topic>` | Bridge exploration to building — synthesize into a requirement |

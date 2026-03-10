@@ -8,6 +8,11 @@ This project uses a structured, gated development workflow. Read `@rules/preambl
 /requirement → /hld → /lld → /implement → /review → /staging → /docs → /retro
 ```
 
+For new domains, a pre-pipeline exploration flow is available:
+```
+/explore → /spike → /crystallize → /requirement → ...pipeline
+```
+
 The pipeline is **configurable**. Stages can be enabled or disabled via `workflow.pipeline` in `.dev-workflow/preferences.yml`. Mandatory stages (`requirement`, `lld`, `implement`, `review`) cannot be skipped. Individual features can further override the pipeline via `pipeline_overrides` in their requirement document.
 
 **Parallel execution**: Independent tasks within `/implement` run in concurrent waves computed from the LLD dependency graph. Pipeline stages can also run in parallel via `workflow.pipeline.parallel_groups` (e.g., `[observe, staging]` and `[docs, retro]`).
@@ -53,3 +58,6 @@ All documents in `docs/` (requirements, hld, lld, adr, runbooks, migrations, das
 | `/doctor` | Scan codebase for tech debt, generate health report |
 | `/onboard` | Generate codebase-aware CLAUDE.md and AGENTS.md |
 | `/workflow <name>` | Run the full pipeline end-to-end (respects pipeline config) |
+| `/explore <topic>` | Explore a new topic — code-first, curiosity-driven, state tracked |
+| `/spike <topic> <question>` | Time-boxed spike — hypothesis, minimal code, decision |
+| `/crystallize <topic>` | Bridge exploration to building — synthesize into a requirement |
