@@ -37,13 +37,16 @@
     "rules/",
     "hooks/",
     ".claude-plugin/",
+    "skills-lock.json",
     "CLAUDE.md",
     "AGENTS.md",
     "README.md"
   ],
   "scripts": {
     "init": "node bin/init.js init",
-    "update": "node bin/update.js"
+    "update": "node bin/update.js",
+    "lock": "node bin/lock.js",
+    "verify": "node bin/lock.js --verify"
   },
   "engines": {
     "node": ">=18.0.0"

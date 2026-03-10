@@ -106,6 +106,13 @@ function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
 
+  if (args.includes('--verify')) {
+    // Delegate to lock.js verify mode
+    process.argv = [process.argv[0], process.argv[1], '--verify'];
+    require('./lock.js');
+    return;
+  }
+
   console.log('');
   console.log('[dev-workflow] Checking for updates...');
   console.log('');

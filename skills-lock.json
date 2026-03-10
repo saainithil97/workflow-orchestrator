@@ -1,0 +1,137 @@
+{
+  "version": "1.0.0",
+  "generated": "2026-03-10",
+  "skills": {
+    "crystallize": {
+      "path": "skills/crystallize/SKILL.md",
+      "hash": "sha256:e959ac72897730e47c2fd7533c80336bfaa641065e1cf53ae1bb7f99e976ae5f",
+      "description": "Transition from exploration to building. Synthesizes learning artifacts into a draft requirement, mapping spike decisions to technical constraints and open questions to scope boundaries. The bridge between /explore and /requirement.",
+      "context": "fork",
+      "agent": "architect"
+    },
+    "docs": {
+      "path": "skills/docs/SKILL.md",
+      "hash": "sha256:e97687770ba44e41dd230d9b723a0f64f76ae950073911a7741d2f447087d7f6",
+      "description": "Update all documentation to match the implementation. Syncs design docs, updates README, creates runbooks, migration guides, and validates dashboard definitions. Use after staging validation passes.",
+      "context": "fork",
+      "agent": "documenter"
+    },
+    "doctor": {
+      "path": "skills/doctor/SKILL.md",
+      "hash": "sha256:6360bb7e7a45eb9ab6cc0b32e438d94da4f9ecf321d94a5f734cb05fbbda51f5",
+      "description": "Scan an existing codebase for tech debt, code quality issues, security concerns, testing gaps, and more. Produces a structured inventory at .dev-workflow/tech-debt.yml. Re-runnable — updates existing items and discovers new ones. Use on legacy or inherited codebases.",
+      "context": "fork",
+      "agent": "reviewer"
+    },
+    "explore": {
+      "path": "skills/explore/SKILL.md",
+      "hash": "sha256:c52f3e0427d8eb371f9a1268a8d54ea61f1218d4d6dc706b16a5aa64037093d7",
+      "description": "Explore a new topic with a sharp, opinionated collaborator. Builds understanding through code, not lectures. Tracks state across sessions. Use when entering unfamiliar territory before building.",
+      "context": "fork",
+      "agent": "architect"
+    },
+    "hld": {
+      "path": "skills/hld/SKILL.md",
+      "hash": "sha256:3ec9ce4eca68da12a6bf763b14fead3b437089ec07f0e8b5deaf5b3a5b5a3b8b",
+      "description": "Create a High-Level Design document for a feature. Analyzes the codebase, designs architecture with C4 diagrams, documents API contracts, technology decisions (ADRs), observability strategy, and non-functional requirements. Use after requirement is approved.",
+      "context": "fork",
+      "agent": "architect"
+    },
+    "implement": {
+      "path": "skills/implement/SKILL.md",
+      "hash": "sha256:b8cac6cae768e57d9b3724cfdf49d8aae1187c989df7cd3f8a72fe8815df9d47",
+      "description": "Implement LLD tasks using strict Test-Driven Development (Red-Green-Refactor). Computes execution waves from the task dependency graph and runs every task as a forked agent — the orchestrator never writes code directly. Includes OTel instrumentation, structured logging, and metrics. Use after LLD is approved.",
+      "context": "fork",
+      "agent": "implementer"
+    },
+    "lld": {
+      "path": "skills/lld/SKILL.md",
+      "hash": "sha256:503ac835224d9e5424173a1104d0a4d3b7a9a8e5f1c28a8d2bff9d2a4151b830",
+      "description": "Create a Low-Level Design with an ordered task checklist, function signatures, data models, test strategies, and observability specifications. Each task is an atomic, testable unit of work. Use after HLD is approved.",
+      "context": "fork",
+      "agent": "architect"
+    },
+    "observe": {
+      "path": "skills/observe/SKILL.md",
+      "hash": "sha256:e7497b8eee1d01a2a0ba3bf39006c422aab7eadf973e697a27154d3ec08ebeda",
+      "description": "Add or verify OpenTelemetry instrumentation, structured logging, metrics, dashboards-as-code, and alert rules. Can be used standalone or as part of the workflow pipeline. Use when you need to add or audit observability.",
+      "context": "fork",
+      "agent": "implementer"
+    },
+    "onboard": {
+      "path": "skills/onboard/SKILL.md",
+      "hash": "sha256:79c5817f74df85b4eb295d6104f2fc33222c3d8bee93de117293e93832717e60",
+      "description": "Analyze an existing codebase and generate project-specific CLAUDE.md and AGENTS.md files with dev-workflow integration. Detects language, framework, conventions, directory structure, build commands, and known patterns. Use on legacy or inherited codebases that lack these files.",
+      "context": "fork",
+      "agent": "architect"
+    },
+    "preferences": {
+      "path": "skills/preferences/SKILL.md",
+      "hash": "sha256:7d937589fa1621670ecc45974f786898f65a7102fa636714a0786afa7e8b35de",
+      "description": "View, update, or initialize developer and team preferences. Covers language, framework, testing, logging, OTel, dashboards, review dimensions, pipeline config, model routing, and parallelism. Use at any time to configure the workflow."
+    },
+    "requirement": {
+      "path": "skills/requirement/SKILL.md",
+      "hash": "sha256:20969d6e79390611208a246038b20c0003b0398374ebbc8df61a48c04285bcd3",
+      "description": "Gather, clarify, and document a feature requirement. Asks structured questions, captures acceptance criteria in BDD format, identifies constraints and dependencies. Use when starting work on a new feature.",
+      "context": "fork",
+      "agent": "architect"
+    },
+    "reset": {
+      "path": "skills/reset/SKILL.md",
+      "hash": "sha256:b8e01014d8b8e905524b9bb3da88df74fef0f0b1e5b9ea0f35694c09202dd8b9",
+      "description": "Manually fix pipeline state — mark stages complete, reset tasks to pending, or repair malformed frontmatter."
+    },
+    "retro": {
+      "path": "skills/retro/SKILL.md",
+      "hash": "sha256:c8b4a419e97b5b51d48991cecd43800b1296c751c736fa5a7720d971174924fd",
+      "description": "Retrospective — capture what went well, what went wrong, and what to do differently. Records learnings, user feedback, and agent mistakes for future sessions. Use after completing a feature or at the end of any session.",
+      "context": "fork"
+    },
+    "review": {
+      "path": "skills/review/SKILL.md",
+      "hash": "sha256:6c1484be8d3f04525415dc58662659c280dde6aa01b1241fb2b9cc6207b371a6",
+      "description": "Code review using 5 core dimensions — correctness, security, error handling, readability, and performance. Runs automated checks, then manual review. Appends findings to the LLD with severity ratings. Use after implementation is complete.",
+      "context": "fork",
+      "agent": "reviewer"
+    },
+    "review-extended": {
+      "path": "skills/review-extended/SKILL.md",
+      "hash": "sha256:f990c3939820693cfbdb0b2076010bc4014951f35614ee2c7557fe848864e9d1",
+      "description": "Full 20-dimension code review covering all Tier 1, 2, and 3 dimensions. Use for thorough periodic reviews or high-risk features. Significantly more comprehensive than the standard /review.",
+      "context": "fork",
+      "agent": "reviewer"
+    },
+    "spike": {
+      "path": "skills/spike/SKILL.md",
+      "hash": "sha256:d377e66fb2ed17e40173afc81aefcf91f80dc937ff956627555232309423b424",
+      "description": "Time-boxed investigation of a technical question. Define a hypothesis, build the minimum code to answer it, record the decision. Use when you need to test an assumption, not discuss it.",
+      "context": "fork",
+      "agent": "architect"
+    },
+    "staging": {
+      "path": "skills/staging/SKILL.md",
+      "hash": "sha256:e0b7115a958672f014ad20347a95b8f12809a587dfedd9e11efa82a20be70c7b",
+      "description": "Deploy to staging environment, run integration and E2E tests, validate observability (traces, logs, metrics, dashboards), and report results. Use after review passes.",
+      "context": "fork",
+      "agent": "implementer"
+    },
+    "status": {
+      "path": "skills/status/SKILL.md",
+      "hash": "sha256:9adc989bd4007719cf0fce3dbe7ef00c4dea4cd054249f721cd86858bf98001b",
+      "description": "Show pipeline status for a feature — which stages are complete, in-progress, or pending. Read-only."
+    },
+    "tools": {
+      "path": "skills/tools/SKILL.md",
+      "hash": "sha256:537bbc47fda01fb23f8e5b109ca4cfe1d317bad66da58be4739f15cf56d6b124",
+      "description": "Browse, recommend, and configure MCP servers and developer tools for your project. Reads the tools catalog, matches recommendations to your stack, and provides install instructions.",
+      "context": "fork"
+    },
+    "workflow": {
+      "path": "skills/workflow/SKILL.md",
+      "hash": "sha256:2bb5a66fb8052e248af0ec725a494e4298451ed984545cc62322a58a56b6a02c",
+      "description": "Run the full development pipeline end-to-end for a feature — requirement gathering, HLD, LLD, TDD implementation, code review, staging validation, documentation sync, and retrospective. Pauses for user approval at key stages. Supports parallel stage groups and model routing from preferences.",
+      "context": "fork"
+    }
+  }
+}
