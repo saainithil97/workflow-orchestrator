@@ -13,6 +13,7 @@
  * What it does:
  *   - On tool.execute.before: If the agent tries to write implementation code
  *     without an approved LLD, it injects a warning or blocks the write.
+ *   - On session.idle: Warns if explore journals are stale (state.yml newer than journal.md).
  *   - On session.idle: Suggests running /retro if substantial work was done.
  */
 
@@ -83,6 +84,32 @@ function hasRecentDocsWork(directory) {
   return false;
 }
 
+function findExploreSessionsWithStaleJournals(directory) {
+  const learnDir = path.join(directory, '.learn', 'topics');
+  const stale = [];
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  try {
+    for (const entry of fs.readdirSync(learnDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const stateFile = path.join(learnDir, entry.name, 'state.yml');
+      const journalFile = path.join(learnDir, entry.name, 'journal.md');
+      try {
+        const stateMtime = fs.statSync(stateFile).mtimeMs;
+        // Only consider sessions active in the last 24 hours
+        if (now - stateMtime > oneDayMs) continue;
+        // Journal is stale if it hasn't been written since the last state update
+        let journalMtime = 0;
+        try { journalMtime = fs.statSync(journalFile).mtimeMs; } catch { /* no journal yet */ }
+        if (journalMtime < stateMtime) {
+          stale.push(entry.name);
+        }
+      } catch { /* skip unreadable entries */ }
+    }
+  } catch { /* .learn/topics/ may not exist */ }
+  return stale;
+}
+
 // ── Plugin ───────────────────────────────────────────────────────────────────
 
 module.exports = async ({ directory, client }) => {
@@ -120,18 +147,32 @@ module.exports = async ({ directory, client }) => {
       }
     },
 
-    // ── Session idle: suggest retro if recent docs work exists ──
+    // ── Session idle: remind to flush explore journals + suggest retro ──
     event: async ({ event }) => {
-      if (event.type === 'session.idle') {
-        if (hasRecentDocsWork(directory)) {
-          await client.app.log({
-            body: {
-              service: 'dev-workflow',
-              level: 'info',
-              message: '[dev-workflow] You have recent work in docs/. Consider running /retro to capture learnings.',
-            },
-          });
-        }
+      if (event.type !== 'session.idle') return;
+
+      const staleSessions = findExploreSessionsWithStaleJournals(directory);
+      if (staleSessions.length > 0) {
+        await client.app.log({
+          body: {
+            service: 'dev-workflow',
+            level: 'warn',
+            message:
+              `[dev-workflow] Explore journal not yet written for: ${staleSessions.join(', ')}. ` +
+              'Before ending, append today\'s entry to .learn/topics/<topic>/journal.md ' +
+              '(focus, did, gap, decision, next).',
+          },
+        });
+      }
+
+      if (hasRecentDocsWork(directory)) {
+        await client.app.log({
+          body: {
+            service: 'dev-workflow',
+            level: 'info',
+            message: '[dev-workflow] You have recent work in docs/. Consider running /retro to capture learnings.',
+          },
+        });
       }
     },
   };
